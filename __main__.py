@@ -12,7 +12,7 @@ from tkinter import Tk,Label,Button,Entry,CENTER
 from urllib import request
 from eyed3.id3 import ID3_V2_3
 
-client_credentials_manager = SpotifyClientCredentials(client_id='8e71e8d4a44344f99b92c466b4b9fdd6', client_secret='d23937eb24e84eb6af7cdf083789ee21')
+client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 def task(list,thread):
