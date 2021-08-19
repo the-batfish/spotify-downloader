@@ -6,12 +6,12 @@
 
 ![image](https://user-images.githubusercontent.com/74890659/128459795-4761e777-8d14-4025-b395-40d6c67a5be5.png)
 
-3)Then download the repository and open the __main__.exe file and paste the link of the playlist you want to 
+3)Then download the repository and open the __main__.py file and paste the link of the playlist you want to 
 download(only first 100 songs due to limitations in spotipy) and click on the "Download songs" button 
 and let it download and convert the songs which will take time depending on your cpu and number of songs in the playlist
 
 ![image](https://user-images.githubusercontent.com/74890659/128459967-6c0b7b94-4ea0-43b3-a509-e3f906a876da.png)
 
-4)The songs will be downloaded to "Downloads" folder created within the directory itself where the exe file exists
+4)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
 
-![image](https://user-images.githubusercontent.com/74890659/128460705-31e81900-683d-457f-b74c-ffd33c86576d.png)
+![image](https://user-images.githubusercontent.com/74890659/130122888-4063f898-22de-4df9-95e2-fbdaaf3c9ecf.png)
