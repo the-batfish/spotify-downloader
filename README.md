@@ -7,14 +7,19 @@
 ![image](https://user-images.githubusercontent.com/74890659/128459795-4761e777-8d14-4025-b395-40d6c67a5be5.png)
 
 3)Download the required libraries:
+
 Spotipy:
 ```pip install spotipy --upgrade```
+
 youtube_search:
 ```pip install youtube-search```
+
 pytube:
 ```pip install pytube```
+
 pydub:
 ```pip install pydub```
+
 eyeD3:
 ```pip install eyeD3```
 
