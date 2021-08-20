@@ -21,15 +21,22 @@ pydub:
 ```pip install pydub```
 
 eyeD3:
-```pip install eyeD3```
+```pip install eyeD3``` 
 
+4)You also require a client id and client secret for the program to work which you can obtain from https://developer.spotify.com/ 
+by logging in and creating a new app from the dashboard which will then give you a client id and client secret 
+which you paste in the code
 
-4)Then download the repository and open the __main__.py file and paste the link of the playlist you want to 
+![image](https://user-images.githubusercontent.com/74890659/130178928-61802ff8-c549-4509-b055-5c96a440e34d.png)
+
+![image](https://user-images.githubusercontent.com/74890659/130178984-0243cc2a-d180-45c9-b132-0d1783feabc3.png)
+
+5)Then download the repository and open the __main__.py file and paste the link of the playlist you want to 
 download and click on the "Download songs" button and let it download and convert the songs which will take 
 time depending on your cpu and number of songs in the playlist
 
 ![image](https://user-images.githubusercontent.com/74890659/128459967-6c0b7b94-4ea0-43b3-a509-e3f906a876da.png)
 
-5)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
+6)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
 
 ![image](https://user-images.githubusercontent.com/74890659/130122888-4063f898-22de-4df9-95e2-fbdaaf3c9ecf.png)
