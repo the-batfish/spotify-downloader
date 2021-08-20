@@ -65,6 +65,7 @@ def task(list,thread):
             print('Converted a song')
         except Exception as e:
             print('Couldnt convert song',e)
+        referencedict.pop(i)
 
 if __name__ == '__main__':
     freeze_support( )
