@@ -12,6 +12,7 @@ from tkinter import Tk,Label,Button,Entry,CENTER
 from urllib import request
 from eyed3.id3 import ID3_V2_3
 
+
 client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
@@ -37,12 +38,14 @@ def task(list,thread):
                 'artist':j['artists'][0]['name'],
                 'album':j['album']['name'],
                 'albumartist':j['album']['artists'][0]['name'],
-                'title':j['name']
+                'title':j['name'],
+                'date':j['album']['release_date'][0:4]
                 }
             print('Thread {} sucessfully downloaded a song'.format(thread))
         except:
             yt=YouTube(vid_url).streams.get_audio_only()
             print('Couldn\'t download',song,'result:',yt)
+
     for i in referencedict:
         try:
             #converting song
@@ -53,36 +56,41 @@ def task(list,thread):
             if not audiofile.tag:
                 audiofile.initTag()
             request.urlretrieve(referencedict[i]['iconurl'],ospath.join(download_path,referencedict[i]['iconname']))
-            audiofile.tag.artist = referencedict[i]['artist']
-            audiofile.tag.album = referencedict[i]['album']
-            audiofile.tag.title = referencedict[i]['title']
-            audiofile.tag.album_artist = referencedict[i]['albumartist']
-            audiofile.tag.images.set(3, open(ospath.join(download_path,referencedict[i]['iconname']),'rb').read(), 'image/jpeg')
-            audiofile.tag.save(version=ID3_V2_3)
+            tag=audiofile.tag
+            tag.artist = referencedict[i]['artist']
+            tag.album = referencedict[i]['album']
+            tag.title = referencedict[i]['title']
+            tag.album_artist = referencedict[i]['albumartist']
+            tag.recording_date=referencedict[i]['date']
+            tag.images.set(3, open(ospath.join(download_path,referencedict[i]['iconname']),'rb').read(), 'image/jpeg')
+            tag.save(version=ID3_V2_3)
             #deleting stuff
             remove(ospath.join(download_path,i))
             remove(ospath.join(download_path,referencedict[i]['iconname']))
             print('Converted a song')
         except Exception as e:
             print('Couldnt convert song',e)
-        referencedict.pop(i)
+    referencedict.clear()
 
 if __name__ == '__main__':
-    freeze_support( )
+    freeze_support()
     def start():
         download_but.config(state='disabled',text='downloading')
         spotify_list=sp.playlist_tracks(url.get())
         tracks=spotify_list['items']
         if spotify_list['next'] is not None:
             tracks.extend(sp.next(spotify_list)['items'])
-        
+        procs=[]
         for i in range(cpu_count()-1):
-            p=Pool()
+            p=Pool(1)
             poollist=tracks[i::cpu_count()-1]
             r=p.apply_async(task,[poollist,str(i+1)])
-        r.wait()
+            procs.append(r)
+        for r in procs:
+            r.wait()
         p.close()
         p.join()
+
         download_but.config(state='normal',text='Download songs')
     window=Tk()
     window.geometry('500x300')
