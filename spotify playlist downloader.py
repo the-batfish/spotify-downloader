@@ -8,10 +8,9 @@ from os import remove
 from os import path as ospath
 import sys
 from eyed3 import load as mdload
-from tkinter import Tk,Label,Button,Entry,CENTER,NORMAL,DISABLED
+from tkinter import Tk,Label,Button,Entry,CENTER,messagebox
 from urllib import request
 from eyed3.id3 import ID3_V2_3
-from time import time
 
 client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
@@ -93,6 +92,7 @@ if __name__ == '__main__':
             p.close()
             p.join()
             download_but.config(state='normal',text='Download songs')
+            messagebox.showinfo('Download finished','The program has finished downloading the playlist')
         download_but.config(state='disabled',text='Downloading')
         window.update()
         window.after(5,dl)                                                                                                                                                                                                                                                                                                                                                                                                        
