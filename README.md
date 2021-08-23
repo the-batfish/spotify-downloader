@@ -1,4 +1,4 @@
-1)Make sure you have downloaded ffmpeg executable from https://www.ffmpeg.org/download.html and extract it to any location of your choice.
+1)Make sure you have downloaded ffmpeg from https://www.ffmpeg.org/download.html and extract it to any location of your choice.
 
 ![image](https://user-images.githubusercontent.com/74890659/128459452-62e3fcec-4c50-4d93-a074-23a1dc215666.png)
 
@@ -31,9 +31,11 @@ which you paste in the code
 
 ![image](https://user-images.githubusercontent.com/74890659/130178984-0243cc2a-d180-45c9-b132-0d1783feabc3.png)
 
-5)Then download the repository and open the __main__.py file and paste the link of the playlist you want to 
-download and click on the "Download songs" button and let it download and convert the songs which will take 
-time depending on your cpu and number of songs in the playlist
+5)Then download the repository and open the ```spotify playlist downloader.py``` file and paste the link of 
+the playlist you want to download and click on the "Download songs" button and let it download and convert 
+the songs which will take time depending on your cpu and number of songs in the playlist or if you are 
+unwilling to use the .py file you can instead use the .exe file which does not require the libraries to be
+installed although ffmpeg has to installed and added to path for it to work
 
 ![image](https://user-images.githubusercontent.com/74890659/128459967-6c0b7b94-4ea0-43b3-a509-e3f906a876da.png)
 
