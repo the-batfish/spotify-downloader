@@ -23,6 +23,7 @@ if getattr(sys, 'frozen', False):
 elif __file__:
     application_path = ospath.dirname(__file__)
 def task(tracks):
+    global application_path
     global window
     global stop
     download_but.config(state='disabled',text='Downloading')
@@ -43,7 +44,6 @@ def task(tracks):
             yt=YouTube(vid_url.replace('watch?v=','')).streams.get_audio_only()
             yt.download(download_path)
 
-            print('Thread sucessfully downloaded a song')
             scrolled.insert(INSERT,'Thread sucessfully downloaded {}\n'.format(j['name']))
     
         except Exception as e:
@@ -54,11 +54,10 @@ def task(tracks):
             #converting song
             webm = AudioSegment.from_file(ospath.join(download_path,yt.default_filename))
             duration_s=j['duration_ms']/1000
-            print(webm.duration_seconds,duration_s)
             if webm.duration_seconds > duration_s:
                 export_song=webm[:duration_s*1000]
             else:
-                    export_song=webm
+                export_song=webm
             export_song.export(ospath.join(download_path,str(j['artists'][0]['name']+'-'+j['name']+'.mp3').replace('"','')),format='mp3',bitrate=quality)
             #adding metadata
             audiofile=mdload(ospath.join(download_path,str(j['artists'][0]['name']+'-'+j['name']+'.mp3').replace('"','')))
@@ -76,7 +75,7 @@ def task(tracks):
             #deleting stuff
             remove(ospath.join(download_path,yt.default_filename))
             remove(ospath.join(download_path,str(j['artists'][0]['name']+'-'+j['name']+'.jpg').replace('"','')))
-            print('Converted a song')
+            
             scrolled.insert(INSERT,'Converted {}\n'.format(j['name']))
         except Exception as e:
             print('Couldnt convert song',e)
