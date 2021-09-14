@@ -1,12 +1,16 @@
+If you are going to be using only the exe:
 1)Make sure you have downloaded ffmpeg from https://www.ffmpeg.org/download.html and extract it to any location of your choice.
 
 ![image](https://user-images.githubusercontent.com/74890659/128459452-62e3fcec-4c50-4d93-a074-23a1dc215666.png)
 
-2)Then add ffmpeg/bin to path in environment variables
+2)Then add ffmpeg/bin to path in environment variables in system properties:
 
 ![image](https://user-images.githubusercontent.com/74890659/128459795-4761e777-8d14-4025-b395-40d6c67a5be5.png)
 
-3)Download the required libraries:
+3)Make sure to have python and the ffmpeg python library installed.You can install the ffmpeg python library by executing the following command:
+```pip install ffmpeg```
+
+=======================Only if you are going to use the .py file=======================
 
 Spotipy:
 ```pip install spotipy --upgrade```
