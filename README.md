@@ -1,14 +1,6 @@
 If you are going to be using only the exe:
-1)Make sure you have downloaded ffmpeg from https://www.ffmpeg.org/download.html and extract it to any location of your choice.
 
-![image](https://user-images.githubusercontent.com/74890659/128459452-62e3fcec-4c50-4d93-a074-23a1dc215666.png)
-
-2)Then add ffmpeg/bin to path in environment variables in system properties:
-
-![image](https://user-images.githubusercontent.com/74890659/128459795-4761e777-8d14-4025-b395-40d6c67a5be5.png)
-
-3)Make sure to have python and the ffmpeg python library installed.You can install the ffmpeg python library by executing the following command:
-```pip install ffmpeg```
+Just open the exe and paste a playlist link and let it download ,no pre-requsites needed.
 
 =======================Only if you are going to use the .py file=======================
 
@@ -24,8 +16,8 @@ pytube:
 pydub:
 ```pip install pydub```
 
-eyeD3:
-```pip install eyeD3``` 
+mutagen:
+```pip install mutagen``` 
 
 4)You also require a client id and client secret for the program to work which you can obtain from https://developer.spotify.com/ 
 by logging in and creating a new app from the dashboard which will then give you a client id and client secret 
