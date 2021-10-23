@@ -33,7 +33,7 @@ the songs which will take time depending on your cpu and number of songs in the 
 unwilling to use the .py file you can instead use the .exe file which does not require the libraries to be
 installed although ffmpeg has to installed and added to path for it to work
 
-![image](https://user-images.githubusercontent.com/74890659/128459967-6c0b7b94-4ea0-43b3-a509-e3f906a876da.png)
+![image](https://user-images.githubusercontent.com/74890659/138553977-3c2c47c4-02bd-4ee4-9bff-c67abba51368.png)
 
 6)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
 
