@@ -13,13 +13,10 @@ youtube_search:
 pytube:
 ```pip install pytube```
 
-pydub:
-```pip install pydub```
-
 mutagen:
 ```pip install mutagen``` 
 
-4)You also require a client id and client secret for the program to work which you can obtain from https://developer.spotify.com/ 
+1)You also require a client id and client secret for the program to work which you can obtain from https://developer.spotify.com/ 
 by logging in and creating a new app from the dashboard which will then give you a client id and client secret 
 which you paste in the code
 
@@ -27,7 +24,7 @@ which you paste in the code
 
 ![image](https://user-images.githubusercontent.com/74890659/130178984-0243cc2a-d180-45c9-b132-0d1783feabc3.png)
 
-5)Then download the repository and open the ```spotify playlist downloader.py``` file and paste the link of 
+2)Then download the repository and open the ```spotify playlist downloader.py``` file and paste the link of 
 the playlist you want to download and click on the "Download songs" button and let it download and convert 
 the songs which will take time depending on your cpu and number of songs in the playlist or if you are 
 unwilling to use the .py file you can instead use the .exe file which does not require the libraries to be
@@ -35,7 +32,7 @@ installed although ffmpeg has to installed and added to path for it to work
 
 ![image](https://user-images.githubusercontent.com/74890659/138553977-3c2c47c4-02bd-4ee4-9bff-c67abba51368.png)
 
-6)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
+3)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
 
 ![image](https://user-images.githubusercontent.com/74890659/130122888-4063f898-22de-4df9-95e2-fbdaaf3c9ecf.png)
 
