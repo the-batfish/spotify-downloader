@@ -163,12 +163,13 @@ if __name__=='__main__':
     global scrolled
     scrolled=scrolledtext.ScrolledText(window,width = 55, height = 15, font = ("Arial",10))
     scrolled.place(relx=0.5,rely=0.48,anchor=CENTER)
-
-    download_but=Button(window,text='Download songs',bg='grey',fg='white',font = ("Arial",12),command=start_downloader)
-    download_but.place(relx=0.7,rely=0.93,anchor=CENTER)
+    
+    dl_logo=image_import('dl_logo.png',40,40)
+    download_but=Button(window,text='Download songs',bg='grey',fg='white',font = ("Arial",14),command=start_downloader,image=dl_logo,compound=LEFT)
+    download_but.place(relx=0.5,rely=0.93,anchor=CENTER)
     
     convertlbl=Label(window,text='Convert songs:',font = ("Arial Bold",9),bg = '#3d3d3d', fg = 'white')
-    convertlbl.place(relx=0.15,rely=0.93,anchor=CENTER)
+    convertlbl.place(relx=0.15,rely=0.78,anchor=CENTER)
     global convertcheck
     convertcheck=True
 
@@ -182,7 +183,7 @@ if __name__=='__main__':
             convertcheck=True
        
     convertbut=Button(window,text='ON',bg='grey',fg='white',font = ("Arial",12),command=convert)
-    convertbut.place(relx=0.29,rely=0.93,anchor=CENTER)
+    convertbut.place(relx=0.29,rely=0.78,anchor=CENTER)
 
     def directrory():
         global location
