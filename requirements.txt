@@ -1,0 +1,14 @@
+autopep8==1.6.0
+certifi==2021.10.8
+charset-normalizer==2.0.7
+idna==3.3
+mutagen==1.45.1
+Pillow==8.4.0
+pycodestyle==2.8.0
+pytube==11.0.1
+requests==2.26.0
+six==1.16.0
+spotipy==2.19.0
+toml==0.10.2
+urllib3==1.26.7
+youtube-search==2.1.0
