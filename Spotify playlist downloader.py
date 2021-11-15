@@ -23,12 +23,10 @@ if getattr(sys, 'frozen', False):
 elif __file__:
     application_path = ospath.dirname(__file__)  
 
-def task(tracks):
+def task(tracks,stopper):
     global application_path
     global window
     global stop
-
-    download_but.config(state='disabled',text='Downloading')
 
     global location
     try:
@@ -43,7 +41,18 @@ def task(tracks):
         try:    
             results = YoutubeSearch(song, max_results=1).to_dict()
             vid_url='http://youtu.be'+results[0]['url_suffix'].replace('watch?v=','')
-            yt=YouTube(vid_url.replace('watch?v=','')).streams.get_audio_only()
+            vid=YouTube(vid_url.replace('watch?v=',''))
+            spsonglen=int((j['duration_ms'])/1000)
+            #if search isnt accurate
+            i=0
+            while vid.length >= spsonglen+10 or vid.length <= spsonglen-10 :
+                song=j['name']+' '+j['artists'][0]['name'] +' lyric video'
+                results = YoutubeSearch(song, max_results=10).to_dict()
+                vid_url='http://youtu.be'+results[i]['url_suffix'].replace('watch?v=','')
+                vid=YouTube(vid_url.replace('watch?v=',''))
+                i+=1  
+            yt=vid.streams.get_audio_only()
+            
             m4a_name=''
             for i in j['artists'][0]['name']+'-'+j['name']:
                 if i in ['/','\\','?','%','*',':','|','"','<','>','.',',',';','=']:
@@ -58,6 +67,7 @@ def task(tracks):
             if not ospath.exists(m4apath) or ospath.exists(mp4path):
                 yt.download(download_path,download_name)
                 scrolled.insert(INSERT,'Thread sucessfully downloaded {}\n'.format(j['name']))
+                scrolled.see('end')
     
         except Exception as e:
             yt=YouTube(vid_url).streams.get_audio_only()
@@ -72,7 +82,13 @@ def task(tracks):
                 tags=easymp4.EasyMP4(m4apath)
                 if not tags.tags:
                     tags.add_tags()
-                tags['artist'] = j['artists'][0]['name']
+                artists=''
+                for i in j['artists']:
+                    if i==j['artists'][-1]:
+                        artists+=i['name']
+                    else:
+                        artists+=i['name']+','
+                tags['artist'] = artists
                 tags['album'] = j['album']['name']
                 tags['title'] = j['name']
                 tags['albumartist'] = j['album']['artists'][0]['name']
@@ -87,36 +103,51 @@ def task(tracks):
                 coverart.save()
                 remove(iconname)            
                 scrolled.insert(INSERT,'Converted {}\n'.format(j['name']))
+                scrolled.see('end')
             except Exception as e:
                 print('Couldnt convert song',e)
         if stop==True:
-            break  
-    download_but.config(state='normal',text='Download songs')
+            break
+    if stopper:
+        for i in threads:
+            i.join()
+        download_but.config(state='normal',text='Download songs')
+        scrolled.insert(INSERT,'Songs have finished downloading\n')
+        scrolled.see('end')
 
 def start_downloader(event=None):
     if url.get() not in ('',None):
+        download_but.config(state='disabled',text='Downloading')
         spotify_list=sp.playlist_tracks(url.get())
         tracks=spotify_list['items']
         url.delete(0,len(url.get()))
         if spotify_list['next'] is not None:
             tracks.extend(sp.next(spotify_list)['items'])
+        scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(len(tracks)))
+        scrolled.see('end')
         global threads
+        global twlead
         try:
-            if len(threads)!=None:
-                for i in threads:
+            if len(twlead)!=None:
+                for i in twlead:
                     i.join()
                 print('threads were already running')    
         except:
             pass
         threads=[]
+        twlead=[]
+        stopper=True
         for i in range(cpu_count()):
-            t=Thread(target=task,daemon=False,args=(tracks[i::cpu_count()],))
+            t=Thread(target=task,daemon=False,args=(tracks[i::cpu_count()],stopper))
             t.start()
-            threads.append(t)
+            twlead.append(t)
+            if not stopper:
+                threads.append(t)
+            stopper=False
+        
         
 def stoptrue():
     global stop
-    global threads
     stop=True
     window.destroy()
 
