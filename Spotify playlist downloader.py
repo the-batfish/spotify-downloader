@@ -112,7 +112,7 @@ def task(tracks,stopper):
     if stopper:
         for i in threads:
             i.join()
-        download_but.config(state='normal',text='Download songs')
+        window.download_but.config(state='normal',text='Download songs')
         scrolled.insert('insert','Songs have finished downloading\n')
         scrolled.see('end')
 
@@ -151,83 +151,6 @@ def stoptrue():
     global stop
     stop=True
     window.destroy()
-'''
-if __name__=='__main__':                                                                                                                                                                                                                                                                                                            
-    window = tkinter.Tk()
-    window.geometry('500x550')
-    window.resizable(False,False)
-    window.configure(bg = '#3d3d3d')
-    window.title('Spotify playlist downloader')
-    window.protocol('WM_DELETE_WINDOW',stoptrue)
-
-    def image_import(filename,height,width):
-        try:
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = ospath.abspath(".")
-        try:
-            image_path=ospath.join(base_path,filename)
-            img=Image.open(image_path)
-        except:
-            image_path=ospath.join(application_path,filename)
-            img=Image.open(image_path)
-        img=img.resize((height,width), Image.ANTIALIAS)
-        pic=ImageTk.PhotoImage(img)
-        return pic
-
-    logo=image_import('logo.png',48,48)
-    lbl=Label(window,text=' SPOTIFY PLAYLIST DOWNLOADER',font = ("Arial Bold",14),bg = '#3d3d3d', fg = 'white',image=logo,compound=LEFT)
-    lbl.place(relx=0.5,rely=0.08,anchor=CENTER)
-
-    lbl1=Label(window,text='Enter playlist link:',font = ("Arial Bold",9),bg = '#3d3d3d', fg = 'white')
-    lbl1.place(relx=0.12,rely=0.17,anchor=CENTER)
-
-    lbl2=Label(window,text='Output:',font = ("Arial Bold",12),bg = '#3d3d3d', fg = 'white')
-    lbl2.place(relx=0.5,rely=0.23,anchor=CENTER)
-
-    url=Entry(window,width=40)
-    url.place(relx=0.59,rely=0.17,anchor=CENTER)
-    url.bind('<Return>', start_downloader)
-
-    lbl4=Label(window,text='Download location: '+str(ospath.join(application_path,'Downloads')),font = ("Arial Bold",9),bg = '#3d3d3d', fg = 'white')
-    lbl4.place(relx=0.5,rely=0.85,anchor=CENTER)
-
-    global scrolled
-    scrolled=scrolledtext.ScrolledText(window,width = 55, height = 20, font = ("Arial",10))
-    scrolled.place(relx=0.5,rely=0.48,anchor=CENTER)
-    
-    dl_logo=image_import('dl_logo.png',40,40)
-    download_but=Button(window,text='Download songs',bg='grey',fg='black',font = ("Arial",14),command=start_downloader,image=dl_logo,compound=LEFT)
-    download_but.place(relx=0.5,rely=0.93,anchor=CENTER)
-    
-    convertlbl=Label(window,text='Convert songs:',font = ("Arial Bold",9),bg = '#3d3d3d', fg = 'white')
-    convertlbl.place(relx=0.15,rely=0.78,anchor=CENTER)
-    global convertcheck
-    convertcheck=True
-
-    def convert():
-        global convertcheck
-        if convertcheck:
-            convertbut.config(text='OFF')
-            convertcheck=False
-        else:
-            convertbut.config(text='ON')
-            convertcheck=True
-       
-    convertbut=Button(window,text='ON',bg='grey',fg='black',font = ("Arial",12),command=convert)
-    convertbut.place(relx=0.29,rely=0.78,anchor=CENTER)
-
-    def directrory():
-        global location
-        location=askdirectory()
-        if location:
-            lbl4.config(text='Download location:'+str(location))
-        else:
-            pass
-
-    file=Button(window,text='Change download folder',bg='grey',fg='black',font = ("Arial",12),command=directrory)
-    file.place(relx=0.7,rely=0.78,anchor=CENTER)
-    window.mainloop()'''
 
 class GUI(tkinter.Tk):
     def __init__(self):
