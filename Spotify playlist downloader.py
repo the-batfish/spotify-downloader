@@ -53,17 +53,17 @@ class GUI(tkinter.Tk):
         convertlbl.place(relx=0.15,rely=0.78,anchor='center')
         self.convertcheck=True
 
-        self.convertbut=tkinter.Button(self,text='ON',bg='grey',fg='black',font = ("Arial",12),command=self.convert)
+        self.convertbut=tkinter.Button(self,text='ON', bd=0, bg='#3d3d3d',fg='black',font = ("Arial",12),command=self.convert)
         self.convertbut.place(relx=0.29,rely=0.78,anchor='center')
 
-        file=tkinter.Button(self, text='Change download folder',bg='grey',fg='black',font = ("Arial",12),command=self.directrory)
-        file.place(relx=0.7,rely=0.78,anchor='center')
+        file=tkinter.Button(self, text='Change download folder',bd=0, bg='grey',fg='black',font = ("Arial",12),command=self.directrory)
+        file.place(relx=0.76,rely=0.78,anchor='center')
 
         lbl4=tkinter.Label(self,text='Download location: '+str(ospath.join(self.application_path,'Downloads')),font = ("Arial Bold",9),bg = '#3d3d3d', fg = 'white')
         lbl4.place(relx=0.5,rely=0.85,anchor='center')
         
         self.dl_logo = self.image_import('dl_logo.png',40,40)
-        self.download_but=tkinter.Button(self, text='Download songs',bg='grey',fg='black',font = ("Arial",14),command=self.start_downloader,image=self.dl_logo,compound='left')
+        self.download_but=tkinter.Button(self, text='Download songs', bd=0, bg='grey',fg='black',font = ("Arial",14),command=self.start_downloader,image=self.dl_logo,compound='left',)
         self.download_but.place(relx=0.5,rely=0.93,anchor='center')
         
     def image_import(self, filename, height, width):
