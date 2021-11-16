@@ -18,7 +18,6 @@ from youtube_search import YoutubeSearch
 class GUI(tkinter.Tk):
     def __init__(self):
         super().__init__()
-        self.call('tk', 'scaling', 127.68/72)
 
         self.geometry('500x550')
         self.resizable(False, False)
