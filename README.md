@@ -36,4 +36,5 @@ installed although ffmpeg has to installed and added to path for it to work
 
 ![image](https://user-images.githubusercontent.com/74890659/130122888-4063f898-22de-4df9-95e2-fbdaaf3c9ecf.png)
 
-If you have any problems,doubts,suggestion or any other queries you can reach me on discord at Rickyrorton#6693
+If you have any problems,doubts,suggestion or any other queries you can reach me on discord at Rickyrorton#6693 or
+join the spotify playlist downloader support server at https://discord.gg/8pTQAfAAbm
