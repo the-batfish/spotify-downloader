@@ -12,6 +12,11 @@ from threading import Thread
 from multiprocessing import cpu_count
 from PIL import Image,ImageTk
 from tkinter.filedialog import askdirectory
+<<<<<<< Updated upstream
+=======
+from datetime import datetime
+from time import time as ttime
+>>>>>>> Stashed changes
 
 client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
@@ -35,24 +40,9 @@ def task(tracks,stopper):
         download_path=ospath.join(application_path,'Downloads')
 
     for i in tracks:
-        window.update()
         j=i['track']
         song=j['name']+' '+j['artists'][0]['name'] +' audio'
-        try:    
-            results = YoutubeSearch(song, max_results=1).to_dict()
-            vid_url='http://youtu.be'+results[0]['url_suffix'].replace('watch?v=','')
-            vid=YouTube(vid_url.replace('watch?v=',''))
-            spsonglen=int((j['duration_ms'])/1000)
-            #if search isnt accurate
-            i=0
-            while vid.length >= spsonglen+10 or vid.length <= spsonglen-10 :
-                song=j['name']+' '+j['artists'][0]['name'] +' lyric video'
-                results = YoutubeSearch(song, max_results=10).to_dict()
-                vid_url='http://youtu.be'+results[i]['url_suffix'].replace('watch?v=','')
-                vid=YouTube(vid_url.replace('watch?v=',''))
-                i+=1  
-            yt=vid.streams.get_audio_only()
-            
+        try:
             m4a_name=''
             for i in j['artists'][0]['name']+'-'+j['name']:
                 if i in ['/','\\','?','%','*',':','|','"','<','>','.',',',';','=']:
@@ -63,8 +53,23 @@ def task(tracks,stopper):
             m4a_name+='.m4a'
             mp4path=ospath.join(download_path,download_name)
             m4apath=ospath.join(download_path,m4a_name)
-
-            if not ospath.exists(m4apath) or ospath.exists(mp4path):
+            if not ospath.exists(m4apath) or ospath.exists(mp4path):  
+                results = YoutubeSearch(song, max_results=15).to_dict()
+                spsonglen=int((j['duration_ms'])/1000)
+                for i in results:
+                    try:
+                        time=datetime.strptime(i['duration'],'%M:%S')
+                        vid_length=time.minute*60+time.second
+                    except:
+                        time=datetime.strptime(i['duration'],'%H:%M:%S')
+                        vid_length=time.hour*3600+time.minute*60+time.second
+                    if vid_length >= spsonglen+10 or vid_length <= spsonglen-10 :
+                        pass
+                    else:
+                        vid_url='http://youtu.be'+i['url_suffix'].replace('watch?v=','')
+                        vid=YouTube(vid_url.replace('watch?v=',''))
+                    
+                yt=vid.streams.get_audio_only()
                 yt.download(download_path,download_name)
                 scrolled.insert(INSERT,'Thread sucessfully downloaded {}\n'.format(j['name']))
                 scrolled.see('end')
@@ -109,21 +114,39 @@ def task(tracks,stopper):
         if stop==True:
             break
     if stopper:
+        global start_time
+        global no_of_tracks
+        end=ttime()
         for i in threads:
             i.join()
         download_but.config(state='normal',text='Download songs')
+<<<<<<< Updated upstream
         scrolled.insert(INSERT,'Songs have finished downloading\n')
+=======
+        scrolled.insert(INSERT,'{} tracks have downloaded in {} seconds\n'.format(no_of_tracks,int(end-start_time)))
+>>>>>>> Stashed changes
         scrolled.see('end')
 
 def start_downloader(event=None):
     if url.get() not in ('',None):
+<<<<<<< Updated upstream
+=======
+        global start_time
+        start_time=ttime()
+>>>>>>> Stashed changes
         download_but.config(state='disabled',text='Downloading')
         spotify_list=sp.playlist_tracks(url.get())
         tracks=spotify_list['items']
         url.delete(0,len(url.get()))
         if spotify_list['next'] is not None:
             tracks.extend(sp.next(spotify_list)['items'])
+<<<<<<< Updated upstream
         scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(len(tracks)))
+=======
+        global no_of_tracks
+        no_of_tracks=len(tracks)
+        scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(no_of_tracks))
+>>>>>>> Stashed changes
         scrolled.see('end')
         global threads
         global twlead
@@ -144,7 +167,6 @@ def start_downloader(event=None):
             if not stopper:
                 threads.append(t)
             stopper=False
-        
         
 def stoptrue():
     global stop
