@@ -12,18 +12,10 @@ from threading import Thread
 from multiprocessing import cpu_count
 from PIL import Image,ImageTk
 from tkinter.filedialog import askdirectory
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
 from datetime import datetime
 from time import time as ttime
->>>>>>> Stashed changes
-=======
-from datetime import datetime
-from time import time as ttime
->>>>>>> Stashed changes
 
-client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
+client_credentials_manager = SpotifyClientCredentials(client_id='8e71e8d4a44344f99b92c466b4b9fdd6', client_secret='bd00572bd66e4cbeb4b33907643d31da')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 stop=False
@@ -125,48 +117,22 @@ def task(tracks,stopper):
         for i in threads:
             i.join()
         download_but.config(state='normal',text='Download songs')
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        scrolled.insert(INSERT,'Songs have finished downloading\n')
-=======
         scrolled.insert(INSERT,'{} tracks have downloaded in {} seconds\n'.format(no_of_tracks,int(end-start_time)))
->>>>>>> Stashed changes
-=======
-        scrolled.insert(INSERT,'{} tracks have downloaded in {} seconds\n'.format(no_of_tracks,int(end-start_time)))
->>>>>>> Stashed changes
         scrolled.see('end')
 
 def start_downloader(event=None):
     if url.get() not in ('',None):
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
         global start_time
         start_time=ttime()
->>>>>>> Stashed changes
-=======
-        global start_time
-        start_time=ttime()
->>>>>>> Stashed changes
         download_but.config(state='disabled',text='Downloading')
         spotify_list=sp.playlist_tracks(url.get())
         tracks=spotify_list['items']
         url.delete(0,len(url.get()))
         if spotify_list['next'] is not None:
             tracks.extend(sp.next(spotify_list)['items'])
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(len(tracks)))
-=======
         global no_of_tracks
         no_of_tracks=len(tracks)
         scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(no_of_tracks))
->>>>>>> Stashed changes
-=======
-        global no_of_tracks
-        no_of_tracks=len(tracks)
-        scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(no_of_tracks))
->>>>>>> Stashed changes
         scrolled.see('end')
         global threads
         global twlead
