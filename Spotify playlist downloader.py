@@ -13,6 +13,11 @@ from multiprocessing import cpu_count
 from PIL import Image,ImageTk
 from tkinter.filedialog import askdirectory
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+from datetime import datetime
+from time import time as ttime
+>>>>>>> Stashed changes
 =======
 from datetime import datetime
 from time import time as ttime
@@ -121,7 +126,11 @@ def task(tracks,stopper):
             i.join()
         download_but.config(state='normal',text='Download songs')
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         scrolled.insert(INSERT,'Songs have finished downloading\n')
+=======
+        scrolled.insert(INSERT,'{} tracks have downloaded in {} seconds\n'.format(no_of_tracks,int(end-start_time)))
+>>>>>>> Stashed changes
 =======
         scrolled.insert(INSERT,'{} tracks have downloaded in {} seconds\n'.format(no_of_tracks,int(end-start_time)))
 >>>>>>> Stashed changes
@@ -130,6 +139,11 @@ def task(tracks,stopper):
 def start_downloader(event=None):
     if url.get() not in ('',None):
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+        global start_time
+        start_time=ttime()
+>>>>>>> Stashed changes
 =======
         global start_time
         start_time=ttime()
@@ -141,7 +155,13 @@ def start_downloader(event=None):
         if spotify_list['next'] is not None:
             tracks.extend(sp.next(spotify_list)['items'])
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(len(tracks)))
+=======
+        global no_of_tracks
+        no_of_tracks=len(tracks)
+        scrolled.insert(INSERT,'Your playlist has {} songs\n'.format(no_of_tracks))
+>>>>>>> Stashed changes
 =======
         global no_of_tracks
         no_of_tracks=len(tracks)
