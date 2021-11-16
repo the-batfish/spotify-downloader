@@ -15,7 +15,7 @@ from tkinter.filedialog import askdirectory
 from datetime import datetime
 from time import time as ttime
 
-client_credentials_manager = SpotifyClientCredentials(client_id='8e71e8d4a44344f99b92c466b4b9fdd6', client_secret='bd00572bd66e4cbeb4b33907643d31da')
+client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
 stop=False
