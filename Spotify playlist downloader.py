@@ -74,7 +74,7 @@ class GUI(tkinter.Tk):
 
         self.cnvrt_bool = True
         self.cnvrt_button = tkinter.Button(
-            self, text='ON', bd=0, bg='#3d3d3d', fg='black', font=("Arial", 12), command=self.convert)
+            self, text='ON', bd=0, bg='grey', fg='black', font=("Arial", 12), command=self.convert)
         self.cnvrt_button.grid(row=11, column=2, sticky="SW")
 
         change_dir_button = tkinter.Button(self, text='Change download folder', bd=0, bg='#3d3d3d', fg='black', font=(
@@ -86,7 +86,7 @@ class GUI(tkinter.Tk):
         self.curr_dir_label.grid(row=12, column=0, columnspan=8, sticky="SEW")
 
         self.dl_logo = self.image_import('dl_logo.png', 40, 40)
-        self.download_but = tkinter.Button(self, text='Download songs', bd=0, bg='#3d3d3d', fg='black', font=(
+        self.download_but = tkinter.Button(self, text='Download songs', bd=0, bg='grey', fg='black', font=(
             "Arial", 14), command=self.start_downloader, image=self.dl_logo, compound='left',)
         self.download_but.grid(row=13, column=1, columnspan=6, sticky="SEW")
 
