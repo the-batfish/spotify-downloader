@@ -19,7 +19,7 @@ class GUI(tkinter.Tk):
     def __init__(self):
         super().__init__()
 
-        self.geometry('500x550')
+        self.geometry('550x550')
         self.resizable(False, False)
         self.configure(bg='#3d3d3d')
         self.title('Spotify playlist downloader')
@@ -47,14 +47,14 @@ class GUI(tkinter.Tk):
         header.grid(row=0, column=0, columnspan=9, sticky="NSEW")
 
         url_label = tkinter.Label(self, text='Enter playlist link:', font=(
-            "Arial Bold", 9), bg='#3d3d3d', fg='white')
+            "Arial Bold", 12), bg='#3d3d3d', fg='white')
         url_label.grid(row=1, column=1, sticky="NSE")
 
         self.url = tkinter.Entry(self)
         self.url.grid(row=1, column=2, columnspan=4, sticky="EW")
         self.url.bind('<Return>', self.start_downloader)
 
-        scrolled_cont=tkinter.LabelFrame(self,font = ("Arial Bold",12),bg = '#3d3d3d', fg = 'white', text='Output', labelanchor="n")
+        scrolled_cont=tkinter.LabelFrame(self,font = ("Arial Bold",15),bg = '#3d3d3d', fg = 'white', text='Output', labelanchor="n")
         scrolled_cont.grid(row=3, column=0, columnspan=8, sticky="NSEW")
         for i in range(3):
             scrolled_cont.rowconfigure(i, weight=1)
@@ -65,7 +65,7 @@ class GUI(tkinter.Tk):
         self.scrolled.grid(row=1, column=1)
 
         cnvrt_label = tkinter.Label(self, text='Convert songs:', font=(
-            "Arial Bold", 9), bg='#3d3d3d', fg='white')
+            "Arial Bold", 12), bg='#3d3d3d', fg='white')
         cnvrt_label.grid(row=8, column=1, sticky="NSE")
 
         self.cnvrt_bool = True
@@ -78,8 +78,8 @@ class GUI(tkinter.Tk):
         change_dir_button.grid(row=8, column=5)
 
         curr_dir_label = tkinter.Label(self, text='Download location: '+str(ospath.join(
-            self.application_path, 'Downloads')), font=("Arial Bold", 9), bg='#3d3d3d', fg='white')
-        curr_dir_label.grid(row=9, column=1, columnspan=6, sticky="NSEW")
+            self.application_path, 'Downloads')), wraplength=500, font=("Arial Bold", 10), bg='#3d3d3d', fg='white')
+        curr_dir_label.grid(row=9, column=0, columnspan=8, sticky="NSEW")
 
         self.dl_logo = self.image_import('dl_logo.png', 40, 40)
         self.download_but = tkinter.Button(self, text='Download songs', bd=0, bg='grey', fg='black', font=(
