@@ -47,7 +47,7 @@ class GUI(tkinter.Tk):
             "Arial Bold", 22), background='#323232', foreground='white', image=self.logo, compound='left')
         header.grid(row=0, column=0, columnspan=9, sticky="NSEW")
 
-        url_label = tkinter.Label(self, text='Enter playlist link:', font=(
+        url_label = tkinter.Label(self, text='Enter playlist link: ', font=(
             "Arial Bold", 12), background='#323232', foreground='white')
         url_label.grid(row=1, column=1, sticky="E")
 
@@ -56,8 +56,8 @@ class GUI(tkinter.Tk):
         self.url.bind('<Return>', self.start_downloader)
 
         scrolled_cont = tkinter.LabelFrame(self, font=(
-            "Arial Bold", 15), text=" Output ", background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
-        scrolled_cont.grid(row=2, column=1, rowspan=9,
+            "Arial Bold", 15), text=" Output ", background='#1DB954', foreground='white', borderwidth=3, labelanchor="n")
+        scrolled_cont.grid(row=3, column=1, rowspan=7,
                            columnspan=6, sticky="NSEW")
         scrolled_cont.grid_propagate(False)
 
