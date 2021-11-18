@@ -56,8 +56,12 @@ class GUI(tkinter.Tk):
         self.url.grid(row=1, column=2, columnspan=4, sticky="EW")
         self.url.bind('<Return>', self.start_downloader)
 
+        output_label = tkinter.Label(self, text="OUTPUT", font=(
+            "Arial Bold", 15), background="#323232", foreground="white")
+        output_label.grid(row=2, column=1, columnspan=6, sticky="NSEW")
+
         scrolled_cont = tkinter.LabelFrame(self, font=(
-            "Arial Bold", 15), text=" Output ", background='#1DB954', foreground='white', borderwidth=3, labelanchor="n")
+            "Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=3, labelanchor="n")
         scrolled_cont.grid(row=3, column=1, rowspan=7,
                            columnspan=6, sticky="NSEW")
         scrolled_cont.grid_propagate(False)
@@ -79,7 +83,7 @@ class GUI(tkinter.Tk):
         self.cnvrt_button.grid(row=11, column=2, sticky="SW")
 
         change_dir_button = tkinter.Button(self, text='Change download folder', bd=0, background='#d3d3d3', foreground='black', highlightcolor="#1DB954", font=(
-            "Arial", 12), command=self.directrory, relief="flat")
+            "Arial", 12), command=self.directrory)
         change_dir_button.grid(row=11, column=5, sticky="S")
 
         self.curr_dir_label = tkinter.Label(self, text='Download location: '+str(ospath.join(
@@ -88,7 +92,7 @@ class GUI(tkinter.Tk):
 
         self.dl_logo = self.image_import('dl_logo.png', 27, 27)
         self.download_but = tkinter.Button(self, text='Download songs', bd=0, background='#d3d3d3', foreground='black', highlightcolor="#1DB954", font=(
-            "Arial", 20), command=self.start_downloader, image=self.dl_logo, compound='left', relief="flat", padx=10, pady=10)
+            "Arial", 20), command=self.start_downloader, image=self.dl_logo, compound='left', relief="flat", padx=10)
         self.download_but.grid(row=13, column=1, columnspan=6)
 
     def image_import(self, filename, height, width):
