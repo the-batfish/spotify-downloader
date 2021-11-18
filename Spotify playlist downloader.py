@@ -6,6 +6,7 @@ from os import remove, rename
 from threading import Thread
 from tkinter import scrolledtext, filedialog, messagebox
 from urllib import request
+from datetime import datetime
 
 from mutagen import easymp4, mp4
 from PIL import Image, ImageTk
@@ -170,10 +171,10 @@ class GUI(tkinter.Tk):
             song = j['name']+' '+j['artists'][0]['name'] + ' audio'
             m4a_name = ''
             for i in j['artists'][0]['name']+'-'+j['name']:
-                if not(i.isalnum() or i in ("-",)):
-                    m4a_name += ' '
-                else:
+                if i.isalnum() or i in ("-",):
                     m4a_name += i
+                else:
+                    m4a_name += ' '
             download_name = m4a_name+'.mp4'
             m4a_name += '.m4a'
             mp4path = ospath.join(download_path, download_name)
@@ -186,18 +187,20 @@ class GUI(tkinter.Tk):
                     self.scrolled.see('end')
                     self.scrolled.config(state="disabled")
                 else:
-                    results = YoutubeSearch(song, max_results=15).to_dict()
-                    spsonglen = int((j['duration_ms'])/1000)
-                    #song=j['name']+' '+j['artists'][0]['name'] +' lyric video'
-                    i = 0
-                    while True:
-                        vid_url = 'http://youtu.be' + \
-                            results[i]['url_suffix'].replace('watch?v=', '')
-                        vid = YouTube(vid_url.replace('watch?v=', ''))
-                        if vid.length >= spsonglen+10 or vid.length <= spsonglen-10:
-                            i += 1
+                    results = YoutubeSearch(song, max_results=7).to_dict()
+                    spsonglen=int((j['duration_ms'])/1000)
+                    for i in results:
+                        try:
+                            time=datetime.strptime(i['duration'],'%M:%S')
+                            vid_length=time.minute*60+time.second
+                        except:
+                            time=datetime.strptime(i['duration'],'%H:%M:%S')
+                            vid_length=time.hour*3600+time.minute*60+time.second
+                        if vid_length >= spsonglen+3 or vid_length <= spsonglen-3:
+                            pass
                         else:
-                            break
+                            vid_url='http://youtu.be'+i['url_suffix'].replace('watch?v=','')
+                            vid=YouTube(vid_url.replace('watch?v=',''))
                     yt = vid.streams.get_audio_only()
 
                     if not ospath.exists(m4apath) or ospath.exists(mp4path):
@@ -218,7 +221,7 @@ class GUI(tkinter.Tk):
                 try:
                     # converting song
                     rename(mp4path, m4apath)
-                    # adding metadat
+                    # adding metadata
                     tags = easymp4.EasyMP4(m4apath)
                     if not tags.tags:
                         tags.add_tags()
@@ -236,8 +239,7 @@ class GUI(tkinter.Tk):
                     tags.save()
                     # adding cover art
                     coverart = mp4.MP4(m4apath)
-                    iconname = ospath.join(download_path, str(
-                        j['artists'][0]['name']+'-'+j['name']+'.jpg').replace('"', ''))
+                    iconname = ospath.join(download_path, str(m4a_name.replace('.m4a','.jpg')))
                     request.urlretrieve(
                         j['album']['images'][0]['url'], iconname)
                     with open(iconname, 'rb') as f:
