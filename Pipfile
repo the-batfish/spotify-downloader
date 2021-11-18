@@ -4,23 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-autopep8 = "*"
-certifi = "*"
-charset-normalizer = "*"
-idna = "*"
 mutagen = "*"
-pycodestyle = "*"
-pytube = "*"
-requests = "*"
-six = "*"
+pillow = "*"
 spotipy = "*"
-toml = "*"
-urllib3 = "*"
 youtube-search = "*"
-Pillow = "*"
+pytube = "*"
 
 [dev-packages]
-autopep8 = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.10"
