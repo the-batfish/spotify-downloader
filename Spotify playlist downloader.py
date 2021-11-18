@@ -171,7 +171,7 @@ class GUI(tkinter.Tk):
             song = j['name']+' '+j['artists'][0]['name'] + ' audio'
             m4a_name = ''
             for i in j['artists'][0]['name']+'-'+j['name']:
-                if i.isalnum() or i in ("-",):
+                if i not in ['/','\\','?','%','*',':','|','"','<','>','.',',',';','=']:
                     m4a_name += i
                 else:
                     m4a_name += ' '
