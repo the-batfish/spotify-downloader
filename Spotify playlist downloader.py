@@ -1,13 +1,11 @@
 import sys
 import tkinter
-from multiprocessing import cpu_count
 from os import path as ospath
 from os import remove, rename
 from threading import Thread
 from tkinter import scrolledtext, filedialog, messagebox
 from urllib import request
 from datetime import datetime
-
 from mutagen import easymp4, mp4
 from PIL import Image, ImageTk
 from pytube import YouTube
@@ -31,11 +29,11 @@ class GUI(tkinter.Tk):
             self.rowconfigure(i, weight=1)
         for i in range(8):
             self.columnconfigure(i, weight=1)
-
+        
+        #scope='user-library-read'
         client_credentials_manager = SpotifyClientCredentials(
             client_id='', client_secret='')
-        self.sp = Spotify(
-            client_credentials_manager=client_credentials_manager)
+        self.sp = Spotify(client_credentials_manager=client_credentials_manager)
 
         self.stop = False
         if getattr(sys, 'frozen', False):
@@ -45,7 +43,7 @@ class GUI(tkinter.Tk):
 
         self.logo = self.image_import('logo.png', 48, 48)
         header = tkinter.Label(self, text=' SPOTIFY PLAYLIST DOWNLOADER', font=(
-            "Arial Bold", 22), background='#323232', foreground='white', image=self.logo, compound='left')
+            "Arial Bold", 20), background='#323232', foreground='white', image=self.logo, compound='left')
         header.grid(row=0, column=0, columnspan=9, sticky="NSEW")
 
         url_label = tkinter.Label(self, text='Enter playlist link: ', font=(
@@ -61,8 +59,8 @@ class GUI(tkinter.Tk):
         output_label.grid(row=2, column=1, columnspan=6, sticky="NSEW")
 
         scrolled_cont = tkinter.LabelFrame(self, font=(
-            "Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=3, labelanchor="n")
-        scrolled_cont.grid(row=3, column=1, rowspan=7,
+            "Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
+        scrolled_cont.grid(row=3, column=1, rowspan=8,
                            columnspan=6, sticky="NSEW")
         scrolled_cont.grid_propagate(False)
 
@@ -151,9 +149,9 @@ class GUI(tkinter.Tk):
                 self.threads = []
                 self.twlead = []
                 stopper = True
-                for i in range(cpu_count()):
+                for i in range(10):
                     t = Thread(target=self.task, daemon=False,
-                               args=(tracks[i::cpu_count()], stopper))
+                               args=(tracks[i::10], stopper,i+1))
                     t.start()
                     self.twlead.append(t)
                     if not stopper:
@@ -164,7 +162,7 @@ class GUI(tkinter.Tk):
             messagebox.showwarning(
                 e.http_status, f"Message: {' '.join(e.args[2].split()[1::])}\nHTTP Status: {e.http_status}\nCode: {e.code}")
 
-    def task(self, tracks, stopper):
+    def task(self, tracks, stopper,threadno):
         try:
             download_path = self.location
         except:
@@ -172,7 +170,7 @@ class GUI(tkinter.Tk):
         for i in tracks:
             self.update()
             j = i['track']
-            song = j['name']+' '+j['artists'][0]['name'] + ' audio'
+            song = j['name']+' '+j['artists'][0]['name']+' audio'
             m4a_name = ''
             for i in j['artists'][0]['name']+'-'+j['name']:
                 if i not in ['/','\\','?','%','*',':','|','"','<','>','.',',',';','=']:
@@ -191,7 +189,7 @@ class GUI(tkinter.Tk):
                     self.scrolled.see('end')
                     self.scrolled.config(state="disabled")
                 else:
-                    results = YoutubeSearch(song, max_results=7).to_dict()
+                    results = YoutubeSearch(song, max_results=15).to_dict()
                     spsonglen=int((j['duration_ms'])/1000)
                     for i in results:
                         try:
@@ -200,26 +198,26 @@ class GUI(tkinter.Tk):
                         except:
                             time=datetime.strptime(i['duration'],'%H:%M:%S')
                             vid_length=time.hour*3600+time.minute*60+time.second
-                        if vid_length >= spsonglen+3 or vid_length <= spsonglen-3:
+                        if vid_length >= spsonglen+5 or vid_length <= spsonglen-5:
                             pass
                         else:
                             vid_url='http://youtu.be'+i['url_suffix'].replace('watch?v=','')
                             vid=YouTube(vid_url.replace('watch?v=',''))
+                            break
                     yt = vid.streams.get_audio_only()
 
                     if not ospath.exists(m4apath) or ospath.exists(mp4path):
                         yt.download(download_path, download_name)
                         self.scrolled.config(state="normal")
                         self.scrolled.insert(
-                            'insert', 'Thread sucessfully downloaded {}\n'.format(j['name']))
+                            'insert', 'Thread {} sucessfully downloaded {}\n'.format(threadno,j['name']))
                         self.scrolled.see('end')
                         self.scrolled.config(state="disabled")
 
             except Exception as e:
-                yt = YouTube(vid_url).streams.get_audio_only()
                 messagebox.showerror(
-                    f"Couldn't Download {song}", f"{e}\n\n{yt}")
-                print(e, 'Couldn\'t download', song, 'result:', yt)
+                    f"Couldn't Download {song}", f"{e}")
+                print(e, 'Couldn\'t download', song)
 
             if self.cnvrt_bool and ospath.exists(mp4path):
                 try:
@@ -253,7 +251,7 @@ class GUI(tkinter.Tk):
                     remove(iconname)
                     self.scrolled.config(state="normal")
                     self.scrolled.insert(
-                        'insert', 'Converted "{}"\n'.format(j['name']))
+                        'insert', 'Thread {} Converted "{}"\n'.format(threadno,j['name']))
                     self.scrolled.see('end')
                     self.scrolled.config(state="disabled")
                 except Exception as e:
@@ -286,6 +284,8 @@ class GUI(tkinter.Tk):
 
     def stoptrue(self):
         self.stop = True
+        for i in self.twlead:
+            i.join()
         self.destroy()
 
 
