@@ -126,12 +126,14 @@ class GUI(tkinter.Tk):
 
     def start_downloader(self, event=None):
         try:
-            if self.url.get() not in ('', None):
+            url = self.url.get()
+            self.url.delete(0, len(url))
+            self.url.config(state="disabled")
+            if url not in ('', None):
                 self.download_but.config(state='disabled', text='Downloading')
-                name = self.sp.playlist(self.url.get())["name"]
-                spotify_list = self.sp.playlist_tracks(self.url.get())
+                name = self.sp.playlist(url)["name"]
+                spotify_list = self.sp.playlist_tracks(url)
                 tracks = spotify_list['items']
-                self.url.delete(0, len(self.url.get()))
                 if spotify_list['next'] is not None:
                     tracks.extend(self.sp.next(spotify_list)['items'])
                 self.scrolled.config(state="normal")
@@ -158,6 +160,7 @@ class GUI(tkinter.Tk):
                         self.threads.append(t)
                     stopper = False
         except SpotifyException as e:
+            self.url.config(state="normal")
             self.download_but.config(state="normal", text='Download Songs')
             messagebox.showwarning(
                 e.http_status, f"Message: {' '.join(e.args[2].split()[1::])}\nHTTP Status: {e.http_status}\nCode: {e.code}")
@@ -279,6 +282,7 @@ class GUI(tkinter.Tk):
                 'insert', 'Songs Have Finished Downloading\n\n')
             self.scrolled.see('end')
             self.scrolled.config(state="disabled")
+            self.url.config(state="normal")
             messagebox.showinfo("Playlist Downloaded",
                                 "Songs Have Finished Downloading")
 
