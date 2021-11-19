@@ -50,7 +50,7 @@ class GUI(tkinter.Tk):
             "Arial Bold", 12), background='#323232', foreground='white')
         url_label.grid(row=1, column=1, sticky="E")
 
-        self.url = tkinter.Entry(self, highlightcolor="#1DB954")
+        self.url = tkinter.Entry(self)
         self.url.grid(row=1, column=2, columnspan=4, sticky="EW")
         self.url.bind('<Return>', self.start_downloader)
 
@@ -284,8 +284,9 @@ class GUI(tkinter.Tk):
 
     def stoptrue(self):
         self.stop = True
-        for i in self.twlead:
-            i.join()
+        if hasattr(self, "twlead"):
+            for i in self.twlead:
+                i.join()
         self.destroy()
 
 

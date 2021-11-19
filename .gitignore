@@ -1,5 +1,7 @@
 Downloads/
-pipfile.lock
+__pycache__/
+build/
+dist/
 test.py
 .DS_Store
 .cache
