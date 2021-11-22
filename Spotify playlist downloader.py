@@ -30,7 +30,6 @@ class GUI(tkinter.Tk):
         for i in range(8):
             self.columnconfigure(i, weight=1)
         
-        #scope='user-library-read'
         client_credentials_manager = SpotifyClientCredentials(
             client_id='', client_secret='')
         self.sp = Spotify(client_credentials_manager=client_credentials_manager)
