@@ -9,7 +9,6 @@ from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_search import YoutubeSearch
 from threading import Thread
-from multiprocessing import cpu_count
 from PIL import Image,ImageTk
 from tkinter.filedialog import askdirectory
 from datetime import datetime
@@ -60,11 +59,12 @@ def task(tracks,stopper):
                     except:
                         time=datetime.strptime(i['duration'],'%H:%M:%S')
                         vid_length=time.hour*3600+time.minute*60+time.second
-                    if vid_length >= spsonglen+10 or vid_length <= spsonglen-10 :
+                    if vid_length >= spsonglen+3 or vid_length <= spsonglen-3 :
                         pass
                     else:
                         vid_url='http://youtu.be'+i['url_suffix'].replace('watch?v=','')
                         vid=YouTube(vid_url.replace('watch?v=',''))
+                        break
                     
                 yt=vid.streams.get_audio_only()
                 yt.download(download_path,download_name)
@@ -146,8 +146,8 @@ def start_downloader(event=None):
         threads=[]
         twlead=[]
         stopper=True
-        for i in range(cpu_count()):
-            t=Thread(target=task,daemon=False,args=(tracks[i::cpu_count()],stopper))
+        for i in range(10):
+            t=Thread(target=task,daemon=False,args=(tracks[i::10],stopper))
             t.start()
             twlead.append(t)
             if not stopper:
