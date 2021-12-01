@@ -3,7 +3,7 @@ import tkinter
 from os import path as ospath
 from os import remove, rename
 from threading import Thread
-from tkinter import scrolledtext, filedialog, messagebox
+from tkinter import scrolledtext, filedialog, messagebox, StringVar
 from urllib import request
 from datetime import datetime
 from mutagen import easymp4, mp4
@@ -29,10 +29,11 @@ class GUI(tkinter.Tk):
             self.rowconfigure(i, weight=1)
         for i in range(8):
             self.columnconfigure(i, weight=1)
-        
+
         client_credentials_manager = SpotifyClientCredentials(
             client_id='', client_secret='')
-        self.sp = Spotify(client_credentials_manager=client_credentials_manager)
+        self.sp = Spotify(
+            client_credentials_manager=client_credentials_manager)
 
         self.stop = False
         if getattr(sys, 'frozen', False):
@@ -74,10 +75,12 @@ class GUI(tkinter.Tk):
             "Arial Bold", 12), background='#323232', foreground='white')
         cnvrt_label.grid(row=11, column=1, sticky="SE")
 
-        self.cnvrt_bool = True
-        self.cnvrt_button = tkinter.Button(
-            self, text='ON', bd=0, background='#d3d3d3', foreground='black', highlightcolor="#1DB954", font=("Arial", 12), command=self.convert, relief="flat")
-        self.cnvrt_button.grid(row=11, column=2, sticky="SW")
+        extList = (".mp4", ".m4a", ".mp3")
+        self.ext = StringVar()
+        self.ext.set(extList[0])
+
+        self.cnvrt_option = tkinter.OptionMenu(self, self.ext, *extList)
+        self.cnvrt_option.grid(row=11, column=2, sticky="SW")
 
         change_dir_button = tkinter.Button(self, text='Change download folder', bd=0, background='#d3d3d3', foreground='black', highlightcolor="#1DB954", font=(
             "Arial", 12), command=self.directrory)
@@ -115,14 +118,6 @@ class GUI(tkinter.Tk):
         else:
             pass
 
-    def convert(self):
-        if self.cnvrt_bool:
-            self.cnvrt_button.config(text='OFF')
-            self.cnvrt_bool = False
-        else:
-            self.cnvrt_button.config(text='ON')
-            self.cnvrt_bool = True
-
     def start_downloader(self, event=None):
         try:
             url = self.url.get()
@@ -152,19 +147,25 @@ class GUI(tkinter.Tk):
                 stopper = True
                 for i in range(10):
                     t = Thread(target=self.task, daemon=False,
-                               args=(tracks[i::10], stopper,i+1))
+                               args=(tracks[i::10], stopper, i+1))
                     t.start()
                     self.twlead.append(t)
                     if not stopper:
                         self.threads.append(t)
                     stopper = False
-        except SpotifyException as e:
+            else:
+                self.url.config(state="normal")
+        except Exception as e:
             self.url.config(state="normal")
             self.download_but.config(state="normal", text='Download Songs')
-            messagebox.showwarning(
-                e.http_status, f"Message: {' '.join(e.args[2].split()[1::])}\nHTTP Status: {e.http_status}\nCode: {e.code}")
+            if e is SpotifyException:
+                messagebox.showwarning(
+                    e.http_status, f"Message: {' '.join(e.args[2].split()[1::])}\nHTTP Status: {e.http_status}\nCode: {e.code}")
+            else:
+                print(e)
+                messagebox.showerror("Error", e)
 
-    def task(self, tracks, stopper,threadno):
+    def task(self, tracks, stopper, threadno):
         try:
             download_path = self.location
         except:
@@ -173,46 +174,49 @@ class GUI(tkinter.Tk):
             self.update()
             j = i['track']
             song = j['name']+' '+j['artists'][0]['name']+' audio'
-            m4a_name = ''
+            name = ''
             for i in j['artists'][0]['name']+'-'+j['name']:
-                if i not in ['/','\\','?','%','*',':','|','"','<','>','.',',',';','=']:
-                    m4a_name += i
+                if i not in ['/', '\\', '?', '%', '*', ':', '|', '"', '<', '>', '.', ',', ';', '=']:
+                    name += i
                 else:
-                    m4a_name += ' '
-            download_name = m4a_name+'.mp4'
-            m4a_name += '.m4a'
+                    name += ' '
+            download_name = name+'.mp4'
+            m4a_name = name+'.m4a'
+            mp3_name = name+'.mp3'
             mp4path = ospath.join(download_path, download_name)
             m4apath = ospath.join(download_path, m4a_name)
+            mp3path = ospath.join(download_path, mp3_name)
             try:
-                if ospath.exists(m4apath) or ospath.exists(mp4path):
+                if eval(f"ospath.exists({self.ext.get()[1::]}path)"):
                     self.scrolled.config(state="normal")
                     self.scrolled.insert(
-                        'insert', 'Song Already Exists in Download Directory ({})\n'.format(j['name']))
+                        'insert', 'Thread {}: Song Already Exists in Download Directory- "{}"\n'.format(threadno, j['name']))
                     self.scrolled.see('end')
                     self.scrolled.config(state="disabled")
                 else:
                     results = YoutubeSearch(song, max_results=15).to_dict()
-                    spsonglen=int((j['duration_ms'])/1000)
+                    spsonglen = int((j['duration_ms'])/1000)
                     for i in results:
                         try:
-                            time=datetime.strptime(i['duration'],'%M:%S')
-                            vid_length=time.minute*60+time.second
+                            time = datetime.strptime(i['duration'], '%M:%S')
+                            vid_length = time.minute*60+time.second
                         except:
-                            time=datetime.strptime(i['duration'],'%H:%M:%S')
-                            vid_length=time.hour*3600+time.minute*60+time.second
+                            time = datetime.strptime(i['duration'], '%H:%M:%S')
+                            vid_length = time.hour*3600+time.minute*60+time.second
                         if vid_length >= spsonglen+5 or vid_length <= spsonglen-5:
                             pass
                         else:
-                            vid_url='http://youtu.be'+i['url_suffix'].replace('watch?v=','')
-                            vid=YouTube(vid_url.replace('watch?v=',''))
+                            vid_url = 'http://youtu.be' + \
+                                i['url_suffix'].replace('watch?v=', '')
+                            vid = YouTube(vid_url.replace('watch?v=', ''))
                             break
                     yt = vid.streams.get_audio_only()
 
-                    if not ospath.exists(m4apath) or ospath.exists(mp4path):
+                    if  not (self.ext.get()!=".mp4" and (ospath.exists(mp4path) or ospath.exists(m4apath) or ospath.exists(mp3path))):
                         yt.download(download_path, download_name)
                         self.scrolled.config(state="normal")
                         self.scrolled.insert(
-                            'insert', 'Thread {} sucessfully downloaded {}\n'.format(threadno,j['name']))
+                            'insert', 'Thread {} Sucessfully downloaded "{}"\n'.format(threadno, j['name']))
                         self.scrolled.see('end')
                         self.scrolled.config(state="disabled")
 
@@ -221,54 +225,69 @@ class GUI(tkinter.Tk):
                     f"Couldn't Download {song}", f"{e}")
                 print(e, 'Couldn\'t download', song)
 
-            if self.cnvrt_bool and ospath.exists(mp4path):
-                try:
-                    # converting song
-                    rename(mp4path, m4apath)
-                    # adding metadata
-                    tags = easymp4.EasyMP4(m4apath)
-                    if not tags.tags:
-                        tags.add_tags()
-                    artists = ''
-                    for i in j['artists']:
-                        if i == j['artists'][-1]:
-                            artists += i['name']
+            try:
+                if ospath.exists(mp4path) or ospath.exists(mp3path):
+                    if self.ext.get() in (".m4a", ".mp3"):
+                        # converting song
+                        try:
+                            rename(mp4path, m4apath)
+                        except FileNotFoundError:
+                            rename(mp3path, m4apath)
+                        # adding metadata
+                        tags = easymp4.EasyMP4(m4apath)
+                        if not tags.tags:
+                            tags.add_tags()
+                        artists = ''
+                        for i in j['artists']:
+                            if i == j['artists'][-1]:
+                                artists += i['name']
+                            else:
+                                artists += i['name']+','
+                        tags['artist'] = artists
+                        tags['album'] = j['album']['name']
+                        tags['title'] = j['name']
+                        tags['albumartist'] = j['album']['artists'][0]['name']
+                        tags['date'] = j['album']['release_date'][0:4]
+                        tags.save()
+                        # adding cover art
+                        coverart = mp4.MP4(m4apath)
+                        iconname = ospath.join(download_path, str(
+                            m4a_name.replace('.m4a', '.jpg')))
+                        request.urlretrieve(
+                            j['album']['images'][0]['url'], iconname)
+                        with open(iconname, 'rb') as f:
+                            coverart['covr'] = [mp4.MP4Cover(
+                                f.read(), imageformat=mp4.MP4Cover.FORMAT_JPEG)]
+                        coverart.save()
+                        remove(iconname)
+
+                        if self.ext.get() == ".mp3" and ospath.exists(mp3path):
+                            rename(m4apath, mp3path)
+                            
                         else:
-                            artists += i['name']+','
-                    tags['artist'] = artists
-                    tags['album'] = j['album']['name']
-                    tags['title'] = j['name']
-                    tags['albumartist'] = j['album']['artists'][0]['name']
-                    tags['date'] = j['album']['release_date'][0:4]
-                    tags.save()
-                    # adding cover art
-                    coverart = mp4.MP4(m4apath)
-                    iconname = ospath.join(download_path, str(m4a_name.replace('.m4a','.jpg')))
-                    request.urlretrieve(
-                        j['album']['images'][0]['url'], iconname)
-                    with open(iconname, 'rb') as f:
-                        coverart['covr'] = [mp4.MP4Cover(
-                            f.read(), imageformat=mp4.MP4Cover.FORMAT_JPEG)]
-                    coverart.save()
-                    remove(iconname)
-                    self.scrolled.config(state="normal")
-                    self.scrolled.insert(
-                        'insert', 'Thread {} Converted "{}"\n'.format(threadno,j['name']))
-                    self.scrolled.see('end')
-                    self.scrolled.config(state="disabled")
-                except Exception as e:
-                    self.scrolled.config(state="normal")
-                    self.scrolled.insert(
-                        'insert', "Couldn't Convert '{}'\n".format(j['name']))
-                    self.scrolled.see('end')
-                    self.scrolled.config(state="disabled")
-                    print('Couldnt convert song', e)
-            elif not self.cnvrt_bool and ospath.exists(mp4path):
+                            self.scrolled.config(state="normal")
+                            self.scrolled.insert(
+                                'insert', 'Thread {}: Converted- "{}"\n'.format(threadno, j['name']))
+                            self.scrolled.see('end')
+                            self.scrolled.config(state="disabled")
+
+                if ospath.exists(m4apath):
+                    if self.ext.get() == ".mp3":
+                        rename(m4apath, mp3path)
+
+                        self.scrolled.config(state="normal")
+                        self.scrolled.insert(
+                            'insert', 'Thread {}: Converted- "{}"\n'.format(threadno, j['name']))
+                        self.scrolled.see('end')
+                        self.scrolled.config(state="disabled")
+
+            except Exception as e:
                 self.scrolled.config(state="normal")
                 self.scrolled.insert(
-                    'insert', 'Skipping "{}" Conversion\n'.format(j['name']))
+                    'insert', "Thread {}: Couldn't Convert- '{}'\n".format(threadno, j['name']))
                 self.scrolled.see('end')
                 self.scrolled.config(state="disabled")
+                print('Couldnt convert song', e)
 
             if self.stop == True:
                 break
@@ -278,12 +297,12 @@ class GUI(tkinter.Tk):
             self.download_but.config(state='normal', text='Download songs')
             self.scrolled.config(state="normal")
             self.scrolled.insert(
-                'insert', 'Songs Have Finished Downloading\n\n')
+                'insert', 'Songs Have Finished Downloading/Converting\n\n')
             self.scrolled.see('end')
             self.scrolled.config(state="disabled")
             self.url.config(state="normal")
             messagebox.showinfo("Playlist Downloaded",
-                                "Songs Have Finished Downloading")
+                                "Songs Have Finished Downloading/Converting")
 
     def stoptrue(self):
         self.stop = True

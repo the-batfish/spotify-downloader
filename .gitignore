@@ -5,3 +5,5 @@ dist/
 test.py
 .DS_Store
 .cache
+test*.py
+
