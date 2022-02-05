@@ -5,7 +5,6 @@ from tkinter.filedialog import askdirectory
 from tkinter.ttk import Progressbar
 import sys
 from os import path as ospath
-from threading import Thread
 import downloader
 
 #defining a window
@@ -43,7 +42,7 @@ scrolled_cont = LabelFrame(window, font=("Arial Bold", 15), background='#1DB954'
 scrolled_cont.place(relx=0.5,rely=0.43,height=330,width=510,anchor=CENTER)
 
 global output_box
-output_box=scrolledtext.ScrolledText(window, font = ("Arial",10),bg='#3d3d3d',fg='white')
+output_box=scrolledtext.ScrolledText(window, font = ("Arial",10),state='disabled',bg='#3d3d3d',fg='white')
 output_box.place(relx=0.5,rely=0.43,height=320,width=500,anchor=CENTER)
 
 dl_location_button=Button(window,text='Change download folder',fg='#3d3d3d',bg='white',font = ("Arial",14),command=lambda:directrory())

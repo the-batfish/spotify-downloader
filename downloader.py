@@ -9,7 +9,6 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_search import YoutubeSearch
 from threading import Thread
 from datetime import datetime
-from time import time as ttime
 from pydub import AudioSegment
 from tkinter import messagebox
 
@@ -20,11 +19,21 @@ def remove_sus_characters(name:str):
     converted = "".join(i for i in name if i not in ("/", "\\", "?", "%", "*", ":", "|", '"', "<", ">", ".", ",", ";", "="))
     return converted
 
+def add_text(scrltxt_obj,text:str):
+    scrltxt_obj.config(state='normal')
+    scrltxt_obj.insert('insert',text)
+    scrltxt_obj.see('end')
+    scrltxt_obj.config(state='disabled')
+
 def accusearch(results,songlen):
     for i in results:
-        time = datetime.strptime(i['duration'], '%M:%S')
-        vid_length = time.minute*60+time.second
-        if vid_length >= songlen+5 or vid_length <= songlen-5:
+        try:
+            time = datetime.strptime(i['duration'], '%M:%S')
+            vid_length = time.minute*60+time.second
+        except:
+            time = datetime.strptime(i['duration'], '%H:%M:%S')
+            vid_length = time.hour*3600+time.minute*60+time.second
+        if vid_length >= songlen+3 or vid_length <= songlen-3:
             pass
         else:
             vid_url = 'http://youtu.be'+ i['url_suffix'].replace('watch?v=', '')
@@ -67,6 +76,9 @@ def mp3convtagger(mp4,mp3,song,path):
 def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
     global threads
     global leader
+    scrltxt.config(state='normal')
+    scrltxt.delete(1.0,'end')
+    scrltxt.config(state='disabled')
     try:
         for t in threads: 
             t.join()
@@ -102,6 +114,8 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
             else:
                 leader.append(t)          
             lead=False
+    elif link==None:
+        messagebox.showerror('No link given','You have not given a valid link,try again but this time dont forget to give a link')
     else:
         messagebox.showerror('Invalid link','You have given an invalid link,try again this time but with a correct link')
 
@@ -120,9 +134,12 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 m4apath=ospath.join(path,download_name+'.m4a')
                 rename(mp4path,m4apath)
                 m4atagger(m4apath,song,path)
+                add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
             except Exception as e:
                 messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-        
+        else:
+            add_text(scrltxt,'Skipping download as {} already exists in directory\n'.format(song['name']))
+
     if filetype=='.mp3':
         if not ospath.exists(ospath.join(path,download_name+'.mp3')):
             try:
@@ -130,16 +147,12 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 yt.download(path,download_name+'.mp4')
                 mp3path=ospath.join(path,download_name+'.mp3')
                 mp3convtagger(mp4path,mp3path,song,path)
+                add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
             except Exception as e:
                 messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-    '''if filetype=='.webm':
-        if not ospath.exists(ospath.join(path,download_name+'.webm')):
-            yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
-            yt.dowload(path,download_name+'.webm')
-            webmpath=ospath.join(path,download_name+'.webm')
-            #webmtagger()'''
-    scrltxt.insert('insert','Finished downloading and converting {}\n'.format(song['name']))
-    scrltxt.see('end')
+        else:
+            add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
+        
     progress['value']=1
     button['state']='normal'
     messagebox.showinfo("Song has finished downloading","The song has finished downloading")
@@ -161,9 +174,12 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress
                     m4apath=ospath.join(path,download_name+'.m4a')
                     rename(mp4path,m4apath)
                     m4atagger(m4apath,song,path)
+                    add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-            
+            else:
+                add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
+
         if filetype=='.mp3':
             if not ospath.exists(ospath.join(path,download_name+'.mp3')):
                 try:
@@ -171,17 +187,19 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress
                     yt.download(path,download_name+'.mp4')
                     mp3path=ospath.join(path,download_name+'.mp3')
                     mp3convtagger(mp4path,mp3path,song,path)
+                    add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-        
+            else:
+                add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
+
         '''if filetype=='.webm':
             if not ospath.exists(ospath.join(path,download_name+'.webm')):
                 yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
                 yt.dowload(path,download_name+'.webm')
                 webmpath=ospath.join(path,download_name+'.webm')
                 #webmtagger()'''
-        scrltxt.insert('insert','Thread {} Finished downloading and converting {}\n'.format(number,song['name']))
-        scrltxt.see('end')
+        
         progress['value']+=1
     if leader:
         global threads
@@ -189,3 +207,4 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress
             i.join()
         button['state']='normal'
         messagebox.showinfo("Songs have finished downloading","All the songs have finished downloading")
+        progress['value']=0
