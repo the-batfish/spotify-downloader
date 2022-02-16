@@ -14,6 +14,10 @@ Debian: https://tracker.debian.org/pkg/ffmpeg
 
 Ubuntu: https://launchpad.net/ubuntu/+source/ffmpeg
 
+The three required ffmpeg executables if you wish to download in mp3 format
+
+![image](https://user-images.githubusercontent.com/74890659/154211073-fc63a638-789a-489f-883d-0b887176b620.png)
+
 =======================Only if you are going to use the .py file=======================
 
 Spotipy:
