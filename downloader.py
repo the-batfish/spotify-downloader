@@ -33,7 +33,7 @@ def accusearch(results,songlen):
         except:
             time = datetime.strptime(i['duration'], '%H:%M:%S')
             vid_length = time.hour*3600+time.minute*60+time.second
-        if vid_length >= songlen+3 or vid_length <= songlen-3:
+        if vid_length >= songlen+7 or vid_length <= songlen-7:
             pass
         else:
             vid_url = 'http://youtu.be'+ i['url_suffix'].replace('watch?v=', '')
@@ -102,7 +102,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
         tracks=playlist['items']
         while playlist['next']:
             playlist=sp.next(playlist)
-            tracks.extend(playlist)
+            tracks.extend(playlist['items'])
         progress['maximum']=len(tracks)
         scrltxt.insert('insert','Downloading playlist \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
@@ -121,8 +121,9 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
 
 def download_song(link,scrltxt,path,filetype,button,progress):
     song=sp.track(link)
-    results = YoutubeSearch(song['name']+' '+song['artists'][0]['name']+' audio', max_results=15).to_dict()
-    spsonglen = int((song['duration_ms'])/1000)
+    results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+    print(song['artists'][0]['name']+' '+song['name'])
+    spsonglen = int(song['duration_ms']/1000)
     download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
     vid=accusearch(results=results,songlen=spsonglen)
     mp4path=ospath.join(path,download_name+'.mp4')
@@ -131,7 +132,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
             try:
                 yt=vid.streams.get_audio_only()
                 yt.download(path,download_name+'.mp4')
-                m4apath=ospath.join(path,download_name+'.m4a')
+                m4apath=ospath.join(path,download_name+'.m4a')  
                 rename(mp4path,m4apath)
                 m4atagger(m4apath,song,path)
                 add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
@@ -152,7 +153,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
         else:
             add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
-        
+    
     progress['value']=1
     button['state']='normal'
     messagebox.showinfo("Song has finished downloading","The song has finished downloading")
@@ -161,7 +162,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
 def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress):
     for i in tracks:
         song=i['track']
-        results = YoutubeSearch(song['name']+' '+song['artists'][0]['name']+' audio', max_results=15).to_dict()
+        results = YoutubeSearch(song['name']+' '+song['artists'][0]['name'], max_results=15).to_dict()
         spsonglen = int((song['duration_ms'])/1000)
         download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
         vid=accusearch(results=results,songlen=spsonglen)
@@ -193,13 +194,7 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress
             else:
                 add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
 
-        '''if filetype=='.webm':
-            if not ospath.exists(ospath.join(path,download_name+'.webm')):
-                yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
-                yt.dowload(path,download_name+'.webm')
-                webmpath=ospath.join(path,download_name+'.webm')
-                #webmtagger()'''
-        
+
         progress['value']+=1
     if leader:
         global threads
