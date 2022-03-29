@@ -1,8 +1,9 @@
 from os import path as ospath
 from os import remove,rename
+from unicodedata import name
 from urllib import request
 from mutagen.mp4 import MP4,MP4Cover
-from mutagen.id3 import ID3,TIT2,APIC,TALB,TPE1,TPE2,TYER
+from mutagen.id3 import ID3,TIT2,APIC,TALB,TPE1,TPE2,TYER,TRCK
 from pytube import YouTube
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -11,6 +12,16 @@ from threading import Thread
 from datetime import datetime
 from pydub import AudioSegment
 from tkinter import messagebox
+from mysql.connector import connect
+
+def checkdb(splink):
+    db=connect(host='',user='',passwd='',database='')
+    cur=db.cursor()
+    cur.execute('Select ytlink from songs where splink like"{}%"'.format(splink))
+    data=cur.fetchone()
+    cur.close()
+    db.close()
+    return data
 
 client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
@@ -33,7 +44,7 @@ def accusearch(results,songlen):
         except:
             time = datetime.strptime(i['duration'], '%H:%M:%S')
             vid_length = time.hour*3600+time.minute*60+time.second
-        if vid_length >= songlen+7 or vid_length <= songlen-7:
+        if vid_length >= songlen+5 or vid_length <= songlen-5:
             pass
         else:
             vid_url = 'http://youtu.be'+ i['url_suffix'].replace('watch?v=', '')
@@ -41,20 +52,24 @@ def accusearch(results,songlen):
     return YouTube(vid_url)
 
 def m4atagger(file,song,path):
-    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-    request.urlretrieve(song['album']['images'][0]['url'],iconname)
-    tags=MP4(file)
-    if not tags.tags:
-        tags.add_tags()
-    tags[u'\xa9nam']=song['name']
-    tags[u'\xa9alb']=song['album']['name']
-    tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
-    tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
-    tags[u'\xa9day']=song['album']['release_date'][0:4]
-    with open(iconname,'rb') as f:
-        tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
-    tags.save()
-    remove(iconname)
+    try:
+        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+        request.urlretrieve(song['album']['images'][0]['url'],iconname)
+        tags=MP4(file)
+        if not tags.tags:
+            tags.add_tags()
+        tags[u'\xa9nam']=song['name']
+        tags[u'\xa9alb']=song['album']['name']
+        tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
+        tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
+        tags[u'\xa9day']=song['album']['release_date'][0:4]
+        #tags[u'trkn']=(int(song["track_number"]),) , (int(song['album']['total_tracks']),)
+        with open(iconname,'rb') as f:
+            tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
+        tags.save()
+        remove(iconname)
+    except Exception as e:
+        print(e)
 
 def mp3convtagger(mp4,mp3,song,path):
     iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
@@ -67,6 +82,7 @@ def mp3convtagger(mp4,mp3,song,path):
     tags.add(TPE1(encoding=3, text=[i['name'] for i in song['artists']]))
     tags.add(TPE2(encoding=3, text=[i['name'] for i in song['album']['artists']]))
     tags.add(TYER(encoding=3, text=[song['album']['release_date'][0:4]]))
+    tags.add(TRCK(encoding=3, text=[song['track_number']]))
     with open(iconname, "rb") as f:
         tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
     tags.save(v2_version=3)
@@ -104,7 +120,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
             playlist=sp.next(playlist)
             tracks.extend(playlist['items'])
         progress['maximum']=len(tracks)
-        scrltxt.insert('insert','Downloading playlist \"{}\" with {} songs\n'.format(name,len(tracks)))
+        add_text(scrltxt,'Downloading playlist \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
         for i in range(threadno):
             t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,i+1,progress),daemon=False)
@@ -121,11 +137,16 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
 
 def download_song(link,scrltxt,path,filetype,button,progress):
     song=sp.track(link)
-    results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
-    print(song['artists'][0]['name']+' '+song['name'])
-    spsonglen = int(song['duration_ms']/1000)
+    data=checkdb(song['external_urls']['spotify'])
+    print(data)
+    if data==None:
+        results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+        spsonglen = int(song['duration_ms']/1000)
+        vid=accusearch(results=results,songlen=spsonglen)
+    else:
+        print(True)
+        vid=YouTube(data[0])
     download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-    vid=accusearch(results=results,songlen=spsonglen)
     mp4path=ospath.join(path,download_name+'.mp4')
     if filetype=='.m4a':
         if not ospath.exists(ospath.join(path,download_name+'.m4a')):
@@ -138,6 +159,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
             except Exception as e:
                 messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
+                print(e)
         else:
             add_text(scrltxt,'Skipping download as {} already exists in directory\n'.format(song['name']))
 
@@ -162,10 +184,15 @@ def download_song(link,scrltxt,path,filetype,button,progress):
 def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress):
     for i in tracks:
         song=i['track']
-        results = YoutubeSearch(song['name']+' '+song['artists'][0]['name'], max_results=15).to_dict()
-        spsonglen = int((song['duration_ms'])/1000)
+        data=checkdb(song['external_urls']['spotify'])
+        if data==None:
+            results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+            spsonglen = int(song['duration_ms']/1000)
+            vid=accusearch(results=results,songlen=spsonglen)
+        else:
+            print(True)
+            vid=YouTube(data[0])
         download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-        vid=accusearch(results=results,songlen=spsonglen)
         mp4path=ospath.join(path,download_name+'.mp4')
         if filetype=='.m4a':
             if not ospath.exists(ospath.join(path,download_name+'.m4a')):
@@ -194,7 +221,13 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,number,progress
             else:
                 add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
 
-
+        '''if filetype=='.webm':
+            if not ospath.exists(ospath.join(path,download_name+'.webm')):
+                yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
+                yt.dowload(path,download_name+'.webm')
+                webmpath=ospath.join(path,download_name+'.webm')
+                #webmtagger()'''
+        
         progress['value']+=1
     if leader:
         global threads

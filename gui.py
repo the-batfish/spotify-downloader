@@ -6,6 +6,7 @@ from tkinter.ttk import Progressbar
 import sys
 from os import path as ospath
 import downloader
+from webbrowser import open_new_tab
 
 #defining a window
 global window
@@ -26,17 +27,17 @@ output_label=Label(window,text='OUTPUT:',font = ("Arial Bold",12),bg = '#3d3d3d'
 output_label.place(relx=0.5,rely=0.17,anchor=CENTER)
 
 download_location=Label(window,text='Download location:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white',justify=LEFT)
-download_location.place(relx=0.5,rely=0.87,anchor=CENTER)
+download_location.place(relx=0.5,rely=0.84,anchor=CENTER)
 
 thread_number=Label(window,text='How many threads to use?\n(More threads=more cpu usage)',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
-thread_number.place(relx=0.2,rely=0.8,anchor=CENTER)
+thread_number.place(relx=0.2,rely=0.77,anchor=CENTER)
 
 filetype=Label(window,text='Filetype:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
-filetype.place(relx=0.73,rely=0.8,anchor=CENTER)
+filetype.place(relx=0.73,rely=0.77,anchor=CENTER)
 
 global progress
 progress=Progressbar(window,orient = HORIZONTAL,mode = 'determinate',length=100)
-progress.place(relx=0.5,rely=0.72,width=400,anchor=CENTER)
+progress.place(relx=0.5,rely=0.7,width=400,anchor=CENTER)
 
 scrolled_cont = LabelFrame(window, font=("Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
 scrolled_cont.place(relx=0.5,rely=0.43,height=330,width=510,anchor=CENTER)
@@ -46,23 +47,23 @@ output_box=scrolledtext.ScrolledText(window, font = ("Arial",10),state='disabled
 output_box.place(relx=0.5,rely=0.43,height=320,width=500,anchor=CENTER)
 
 dl_location_button=Button(window,text='Change download folder',fg='#3d3d3d',bg='white',font = ("Arial",14),command=lambda:directrory())
-dl_location_button.place(relx=0.3,rely=0.94,anchor=CENTER)
+dl_location_button.place(relx=0.3,rely=0.91,anchor=CENTER)
 
 global download_button
-download_button=Button(window,text='Download songs',fg='#3d3d3d',bg='white',font = ("Arial",14),command=lambda:start_downloader())#,image=dl_logo,compound=LEFT)
-download_button.place(relx=0.7,rely=0.94,anchor=CENTER)
+download_button=Button(window,text='Download songs',fg='#3d3d3d',bg='white',font = ("Arial",14),command=lambda:start_downloader())
+download_button.place(relx=0.7,rely=0.91,anchor=CENTER)
 
 global filetype_default
 filetypes=['.m4a','.mp3']
 filetype_default=StringVar()
 filetype_default.set('.m4a')    
 filetype_dropdown=OptionMenu(window,filetype_default,*filetypes)
-filetype_dropdown.place(relx=0.8,rely=0.78)
+filetype_dropdown.place(relx=0.8,rely=0.75)
 
 global thread_num_set
 thread_num_set=Scale(window,from_=1,to=20,tickinterval=19,orient=HORIZONTAL,highlightbackground='#3d3d3d',background='#3d3d3d',fg='white')
 thread_num_set.set(4)
-thread_num_set.place(relx=0.4,rely=0.76)
+thread_num_set.place(relx=0.4,rely=0.73)
 
 entry_cont = LabelFrame(window, font=("Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
 entry_cont.place(relx=0.62,rely=0.12,width=394,height=24,anchor=CENTER)
@@ -70,6 +71,12 @@ entry_cont.place(relx=0.62,rely=0.12,width=394,height=24,anchor=CENTER)
 global playlist_link
 playlist_link=Entry(window,bg='#3d3d3d',fg='white')
 playlist_link.place(relx=0.62,rely=0.12,width=390,height=20,anchor=CENTER)
+
+def server_invite():
+    open_new_tab('https://discord.gg/8pTQAfAAbm')
+discord_link=Label(window,text='Click here to contact us on discord if you have any problems',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white',cursor="hand2")
+discord_link.place(relx=0.5,rely=0.97,anchor=CENTER)
+discord_link.bind("<Button-1>", lambda e:server_invite())
 
 #getting path to the directory
 if getattr(sys, 'frozen', False):
