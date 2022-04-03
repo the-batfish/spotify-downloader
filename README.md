@@ -2,6 +2,9 @@ If you are going to be using only the exe:
 
 Just open the exe and paste a playlist/song link and let it download ,no pre-requsites needed unless you are downloading in mp3 format for which you will need ffmpeg to installed.Either ffmpeg has to be added to path or has to be copied to the directory where the exe file is.
 
+If you have any problems,doubts,suggestion or any other queries you can reach me on discord at Rickyrorton#6693 or
+join the spotify downloader support server at https://discord.gg/8pTQAfAAbm
+
 Make sure you install all 3 exe provided with ffmpeg so that the program works as normal
 
 FFMPEG Download links:
@@ -54,6 +57,3 @@ installed although ffmpeg has to installed and added to path for it to work
 3)The songs will be downloaded to "Downloads" folder created within the directory itself where the py file exists
 
 ![image](https://user-images.githubusercontent.com/74890659/154210788-51e600d5-a0f9-477a-a958-a6dfbd7aa669.png)
-
-If you have any problems,doubts,suggestion or any other queries you can reach me on discord at Rickyrorton#6693 or
-join the spotify downloader support server at https://discord.gg/8pTQAfAAbm
