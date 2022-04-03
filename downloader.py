@@ -80,22 +80,25 @@ def m4atagger(mp4,m4a,song,path):
         print(e)
 
 def mp3convtagger(mp4,mp3,song,path):
-    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-    request.urlretrieve(song['album']['images'][0]['url'],iconname)
-    convert=AudioSegment.from_file(mp4)
-    convert.export(mp3,format='mp3')
-    tags=ID3(mp3)
-    tags.add(TIT2(encoding=3, text=[song['name']]))
-    tags.add(TALB(encoding=3, text=[song['album']['name']]))
-    tags.add(TPE1(encoding=3, text=[i['name'] for i in song['artists']]))
-    tags.add(TPE2(encoding=3, text=[i['name'] for i in song['album']['artists']]))
-    tags.add(TYER(encoding=3, text=[song['album']['release_date'][0:4]]))
-    tags.add(TRCK(encoding=3, text=[song['track_number']]))
-    with open(iconname, "rb") as f:
-        tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
-    tags.save(v2_version=3)
-    remove(mp4)
-    remove(iconname)
+    try:
+        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+        request.urlretrieve(song['album']['images'][0]['url'],iconname)
+        convert=AudioSegment.from_file(mp4)
+        convert.export(mp3,format='mp3')
+        tags=ID3(mp3)
+        tags.add(TIT2(encoding=3, text=[song['name']]))
+        tags.add(TALB(encoding=3, text=[song['album']['name']]))
+        tags.add(TPE1(encoding=3, text=[i['name'] for i in song['artists']]))
+        tags.add(TPE2(encoding=3, text=[i['name'] for i in song['album']['artists']]))
+        tags.add(TYER(encoding=3, text=[song['album']['release_date'][0:4]]))
+        tags.add(TRCK(encoding=3, text=[song['track_number']]))
+        with open(iconname, "rb") as f:
+            tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
+        tags.save(v2_version=3)
+        remove(mp4)
+        remove(iconname)
+    except Exception as e:
+        print(e)
 
 def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
     global threads
@@ -145,21 +148,27 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
 
 def download_song(link,scrltxt,path,filetype,button,progress):
     song=sp.track(link)
-    data=checkdb(song['external_urls']['spotify'])
+    download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
+    if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3'))):
+        try:
+            data=checkdb(song['external_urls']['spotify'])
+        except:
+            pass
+        
+        try:         
+            vid=YouTube(data[0])
+        except:
+            try:
+                results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+                spsonglen = int(song['duration_ms']/1000)
+                vid=accusearch(results=results,songlen=spsonglen)
+            except:
+                vid=None
 
-    if data==None:
-        results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
-        spsonglen = int(song['duration_ms']/1000)
-        vid=accusearch(results=results,songlen=spsonglen)
-    else:
-        print(True)
-        vid=YouTube(data[0])
-
-    if vid != None:
-        download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-        mp4path=ospath.join(path,download_name+'.mp4')
-        if filetype=='.m4a':
-            if not ospath.exists(ospath.join(path,download_name+'.m4a')):
+        if vid != None:
+            download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
+            mp4path=ospath.join(path,download_name+'.mp4')
+            if filetype=='.m4a':
                 try:
                     yt=vid.streams.get_audio_only()
                     yt.download(path,download_name+'.mp4')
@@ -169,11 +178,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
                     print(e)
-            else:
-                add_text(scrltxt,'Skipping download as {} already exists in directory\n'.format(song['name']))
-
-        if filetype=='.mp3':
-            if not ospath.exists(ospath.join(path,download_name+'.mp3')):
+            if filetype=='.mp3':
                 try:
                     yt=vid.streams.get_audio_only()
                     yt.download(path,download_name+'.mp4')
@@ -182,43 +187,42 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                     add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-            else:
-                add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
 
-        '''if filetype=='.webm':
-            if not ospath.exists(ospath.join(path,download_name+'.webm')):
-                yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
-                yt.dowload(path,download_name+'.webm')
-                webmpath=ospath.join(path,download_name+'.webm')
-                #webmtagger()'''
+            progress['value']=1
+            button['state']='normal'
+            messagebox.showinfo("Song has finished downloading","The song has finished downloading")
+            progress['value']=0
         
-        
-        progress['value']=1
-        button['state']='normal'
-        messagebox.showinfo("Song has finished downloading","The song has finished downloading")
-        progress['value']=0
-    
+        else:
+            button['state']='normal'
+            messagebox.showinfo("Song couldn't be downloaded","The program was not able to find the matching song on youtube \nContact the developers and provide them links to the song on spotify and youtube")        
     else:
-        button['state']='normal'
-        messagebox.showinfo("Song couldn't be downloaded","The program was not able to find the matching song on youtube \nContact the developers and provide them links to the song on spotify and youtube")        
+        add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
+        progress['value']+=1
 
 def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
     for i in tracks:
         song=i['track']
-        data=checkdb(song['external_urls']['spotify'])
-        if data==None:
-            results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
-            spsonglen = int(song['duration_ms']/1000)
-            vid=accusearch(results=results,songlen=spsonglen)
-        else:
-            print(True)
-            vid=YouTube(data[0])
-        
-        if vid != None:
-            download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-            mp4path=ospath.join(path,download_name+'.mp4')
-            if filetype=='.m4a':
-                if not ospath.exists(ospath.join(path,download_name+'.m4a')):
+        download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
+        if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3'))):
+            try:
+                data=checkdb(song['external_urls']['spotify'])
+            except:
+                pass
+
+            try:
+                if data==None:
+                    results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+                    spsonglen = int(song['duration_ms']/1000)
+                    vid=accusearch(results=results,songlen=spsonglen)
+                else:
+                    vid=YouTube(data[0])
+            except:
+                vid=None
+
+            if vid != None:
+                mp4path=ospath.join(path,download_name+'.mp4')
+                if filetype=='.m4a':
                     try:
                         yt=vid.streams.get_audio_only()
                         yt.download(path,download_name+'.mp4')
@@ -227,11 +231,8 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
                         add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-                else:
-                    add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
 
-            if filetype=='.mp3':
-                if not ospath.exists(ospath.join(path,download_name+'.mp3')):
+                if filetype=='.mp3':
                     try:
                         yt=vid.streams.get_audio_only()
                         yt.download(path,download_name+'.mp4')
@@ -240,20 +241,17 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
                         add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-                else:
-                    add_text(scrltxt,'Skipping download as {} already existed\n'.format(song['name']))
 
-            '''if filetype=='.webm':
-                if not ospath.exists(ospath.join(path,download_name+'.webm')):
-                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
-                    yt.dowload(path,download_name+'.webm')
-                    webmpath=ospath.join(path,download_name+'.webm')
-                    #webmtagger()'''
-            
-            progress['value']+=1
+                progress['value']+=1
+            else:
+                add_text(scrltxt,'Couldn\'t find {} on yt report problem to devs\n'.format(song['name']))
+                try:
+                    logger('{}-{}\n'.format(song['name'],song['external_urls']['spotify']))
+                except:
+                    logger('{}\n'.format(song['name']))
+                progress['value']+=1
         else:
-            add_text(scrltxt,'Couldn\'t find {} on yt report problem to devs\n'.format(song['name']))
-            logger('{}-{}\n'.format(song['name'],song['external_urls']['spotify']))
+            add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
             progress['value']+=1
     if leader:
         global threads

@@ -71,6 +71,7 @@ entry_cont.place(relx=0.62,rely=0.12,width=394,height=24,anchor=CENTER)
 global playlist_link
 playlist_link=Entry(window,bg='#3d3d3d',fg='white')
 playlist_link.place(relx=0.62,rely=0.12,width=390,height=20,anchor=CENTER)
+playlist_link.bind('<Return>',lambda e:start_downloader())
 
 def server_invite():
     open_new_tab('https://discord.gg/8pTQAfAAbm')
