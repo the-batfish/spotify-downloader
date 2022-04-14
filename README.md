@@ -21,6 +21,10 @@ The three required ffmpeg executables if you wish to download in mp3 format
 
 ![image](https://user-images.githubusercontent.com/74890659/154211073-fc63a638-789a-489f-883d-0b887176b620.png)
 
+If you are wondering if this has any malware here is the exe checked in virustotal: https://www.virustotal.com/gui/file/92eb314ed69573076d7b9137978d5a0412e6909557d3b133630148409ccaf6a4/detection
+
+The 2 out of 69(nice) detections are false positives and the connections it makes are only to spotify(or their content distributors like akamai,fastly,verizon,etc).
+
 =======================Only if you are going to use the .py file=======================
 
 Spotipy:
