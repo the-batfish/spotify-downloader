@@ -23,6 +23,14 @@ def checkdb(splink):
     db.close()
     return data
 
+def songnotfound(splink):
+    db=connect(host='',user='',passwd='',database='')
+    cur=db.cursor()
+    cur.execute('insert into notfound values("{}")'.format(splink))
+    db.commit()
+    cur.close()
+    db.close()
+
 client_credentials_manager = SpotifyClientCredentials(client_id='', client_secret='')
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
@@ -59,25 +67,25 @@ def accusearch(results,songlen):
         pass
 
 def m4atagger(mp4,m4a,song,path):
-    try:
-        rename(mp4,m4a)
-        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-        request.urlretrieve(song['album']['images'][0]['url'],iconname)
-        tags=MP4(m4a)
-        if not tags.tags:
-            tags.add_tags()
-        tags[u'\xa9nam']=song['name']
-        tags[u'\xa9alb']=song['album']['name']
-        tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
-        tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
-        tags[u'\xa9day']=song['album']['release_date'][0:4]
-        #tags[u'trkn']=(int(song["track_number"]),) , (int(song['album']['total_tracks']),)
-        with open(iconname,'rb') as f:
-            tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
-        tags.save()
-        remove(iconname)
-    except Exception as e:
-        print(e)
+    #try:
+    rename(mp4,m4a)
+    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+    request.urlretrieve(song['album']['images'][0]['url'],iconname)
+    tags=MP4(m4a)
+    if not tags.tags:
+        tags.add_tags()
+    tags[u'\xa9nam']=song['name']
+    tags[u'\xa9alb']=song['album']['name']
+    tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
+    tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
+    tags[u'\xa9day']=song['album']['release_date'][0:4]
+    #tags[u'trkn']=(int(song["track_number"]),) , (int(song['album']['total_tracks']),)
+    with open(iconname,'rb') as f:
+        tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
+    tags.save()
+    remove(iconname)
+    '''except Exception as e:
+        print(e)'''
 
 def mp3convtagger(mp4,mp3,song,path):
     try:
@@ -196,6 +204,10 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         else:
             button['state']='normal'
             messagebox.showinfo("Song couldn't be downloaded","The program was not able to find the matching song on youtube \nContact the developers and provide them links to the song on spotify and youtube")        
+            try:
+                songnotfound(link)
+            except:
+                pass
     else:
         add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
         progress['value']+=1
@@ -247,6 +259,7 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
                 add_text(scrltxt,'Couldn\'t find {} on yt report problem to devs\n'.format(song['name']))
                 try:
                     logger('{}-{}\n'.format(song['name'],song['external_urls']['spotify']))
+                    songnotfound(song['external_urls']['spotify'])
                 except:
                     logger('{}\n'.format(song['name']))
                 progress['value']+=1
