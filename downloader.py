@@ -1,6 +1,5 @@
 from os import path as ospath
 from os import remove,rename
-from unicodedata import name
 from urllib import request
 from mutagen.mp4 import MP4,MP4Cover
 from mutagen.id3 import ID3,TIT2,APIC,TALB,TPE1,TPE2,TYER,TRCK
@@ -16,7 +15,7 @@ from mysql.connector import connect
 
 def checkdb(splink):
     db=connect(host='',user='',passwd='',database='')
-    cur=db.cursor()
+    cur=db.cursor(buffered=True)
     cur.execute('Select ytlink from songs where splink like"{}%"'.format(splink))
     data=cur.fetchone()
     cur.close()
@@ -25,7 +24,7 @@ def checkdb(splink):
 
 def songnotfound(splink):
     db=connect(host='',user='',passwd='',database='')
-    cur=db.cursor()
+    cur=db.cursor(buffered=True)
     cur.execute('insert into notfound values("{}")'.format(splink))
     db.commit()
     cur.close()
@@ -196,6 +195,13 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
+            '''if filetype=='.webm':
+                if not ospath.exists(ospath.join(path,download_name+'.webm')):
+                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
+                    yt.dowload(path,download_name+'.webm')
+                    webmpath=ospath.join(path,download_name+'.webm')
+                    #webmtagger()'''
+
             progress['value']=1
             button['state']='normal'
             messagebox.showinfo("Song has finished downloading","The song has finished downloading")
@@ -254,6 +260,13 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
+                '''if filetype=='.webm':
+                    if not ospath.exists(ospath.join(path,download_name+'.webm')):
+                        yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
+                        yt.dowload(path,download_name+'.webm')
+                        webmpath=ospath.join(path,download_name+'.webm')
+                        #webmtagger()'''
+                
                 progress['value']+=1
             else:
                 add_text(scrltxt,'Couldn\'t find {} on yt report problem to devs\n'.format(song['name']))

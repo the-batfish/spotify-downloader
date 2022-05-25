@@ -102,7 +102,7 @@ def image_import(filename,height,width):
     except:
         image_path=ospath.join(application_path,filename)
         img=Image.open(image_path)
-    img=img.resize((height,width), Image.ANTIALIAS)
+    img=img.resize((height,width), Image.Resampling.BOX)
     pic=ImageTk.PhotoImage(img)
     return pic
 
