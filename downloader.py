@@ -160,6 +160,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         try:
             data=checkdb(song['external_urls']['spotify'])
         except:
+            data=None
             pass
         
         try:         
@@ -226,6 +227,7 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
             try:
                 data=checkdb(song['external_urls']['spotify'])
             except:
+                data=None
                 pass
 
             try:
