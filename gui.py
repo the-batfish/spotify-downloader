@@ -54,7 +54,7 @@ download_button=Button(window,text='Download songs',fg='#3d3d3d',bg='white',font
 download_button.place(relx=0.7,rely=0.91,anchor=CENTER)
 
 global filetype_default
-filetypes=['.m4a','.mp3']
+filetypes=['.m4a','.mp3','.wav','.flac']
 filetype_default=StringVar()
 filetype_default.set('.m4a')    
 filetype_dropdown=OptionMenu(window,filetype_default,*filetypes)

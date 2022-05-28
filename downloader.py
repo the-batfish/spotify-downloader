@@ -3,6 +3,7 @@ from os import remove,rename
 from urllib import request
 from mutagen.mp4 import MP4,MP4Cover
 from mutagen.id3 import ID3,TIT2,APIC,TALB,TPE1,TPE2,TYER,TRCK
+from mutagen.wave import WAVE
 from pytube import YouTube
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -66,25 +67,25 @@ def accusearch(results,songlen):
         pass
 
 def m4atagger(mp4,m4a,song,path):
-    #try:
-    rename(mp4,m4a)
-    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-    request.urlretrieve(song['album']['images'][0]['url'],iconname)
-    tags=MP4(m4a)
-    if not tags.tags:
-        tags.add_tags()
-    tags[u'\xa9nam']=song['name']
-    tags[u'\xa9alb']=song['album']['name']
-    tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
-    tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
-    tags[u'\xa9day']=song['album']['release_date'][0:4]
-    #tags[u'trkn']=(int(song["track_number"]),) , (int(song['album']['total_tracks']),)
-    with open(iconname,'rb') as f:
-        tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
-    tags.save()
-    remove(iconname)
-    '''except Exception as e:
-        print(e)'''
+    try:
+        rename(mp4,m4a)
+        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+        request.urlretrieve(song['album']['images'][0]['url'],iconname)
+        tags=MP4(m4a)
+        if not tags.tags:
+            tags.add_tags()
+        tags[u'\xa9nam']=song['name']
+        tags[u'\xa9alb']=song['album']['name']
+        tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
+        tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
+        tags[u'\xa9day']=song['album']['release_date'][0:4]
+        tags[u'trkn']=((int(song["track_number"]),int(song['album']['total_tracks'])),)
+        with open(iconname,'rb') as f:
+            tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
+        tags.save()
+        remove(iconname)
+    except Exception as e:
+        print(e)
 
 def mp3convtagger(mp4,mp3,song,path):
     try:
@@ -103,6 +104,25 @@ def mp3convtagger(mp4,mp3,song,path):
             tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
         tags.save(v2_version=3)
         remove(mp4)
+        remove(iconname)
+    except Exception as e:
+        print(e)
+
+def wavconvtagger(webm,wav,song,path):
+    try:
+        convert=AudioSegment.from_file(webm)
+        convert.export(wav,format='wav')
+        remove(webm)
+    except Exception as e:
+        print(e)
+
+def flacconvtagger(webm,flac,song,path):
+    try:
+        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+        request.urlretrieve(song['album']['images'][0]['url'],iconname)
+        convert=AudioSegment.from_file(webm)
+        convert.export(flac,format='flac')
+        remove(webm)
         remove(iconname)
     except Exception as e:
         print(e)
@@ -156,11 +176,10 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
 def download_song(link,scrltxt,path,filetype,button,progress):
     song=sp.track(link)
     download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-    if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3'))):
+    if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))):
         try:
             data=checkdb(song['external_urls']['spotify'])
         except:
-            data=None
             pass
         
         try:         
@@ -176,6 +195,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         if vid != None:
             download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
             mp4path=ospath.join(path,download_name+'.mp4')
+            webmpath=ospath.join(path,download_name+'.webm')
             if filetype=='.m4a':
                 try:
                     yt=vid.streams.get_audio_only()
@@ -196,12 +216,23 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
-            '''if filetype=='.webm':
-                if not ospath.exists(ospath.join(path,download_name+'.webm')):
-                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
-                    yt.dowload(path,download_name+'.webm')
-                    webmpath=ospath.join(path,download_name+'.webm')
-                    #webmtagger()'''
+            if filetype=='.wav':
+                try:
+                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
+                    yt.download(path,download_name+'.webm')
+                    wavpath=ospath.join(path,download_name+'.wav')
+                    wavconvtagger(webmpath,wavpath,song,path)
+                except Exception as e:
+                    messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
+
+            if filetype=='.flac':
+                try:
+                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
+                    yt.download(path,download_name+'.webm')
+                    flacpath=ospath.join(path,download_name+'.flac')
+                    flacconvtagger(webmpath,flacpath,song,path)
+                except Exception as e:
+                    messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
             progress['value']=1
             button['state']='normal'
@@ -223,7 +254,7 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
     for i in tracks:
         song=i['track']
         download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-        if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3'))):
+        if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))):
             try:
                 data=checkdb(song['external_urls']['spotify'])
             except:
@@ -242,6 +273,7 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
 
             if vid != None:
                 mp4path=ospath.join(path,download_name+'.mp4')
+                webmpath=ospath.join(path,download_name+'.webm')
                 if filetype=='.m4a':
                     try:
                         yt=vid.streams.get_audio_only()
@@ -262,13 +294,24 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
-                '''if filetype=='.webm':
-                    if not ospath.exists(ospath.join(path,download_name+'.webm')):
-                        yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc()[0]
-                        yt.dowload(path,download_name+'.webm')
-                        webmpath=ospath.join(path,download_name+'.webm')
-                        #webmtagger()'''
-                
+                if filetype=='.wav':
+                    try:
+                        yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
+                        yt.download(path,download_name+'.webm')
+                        wavpath=ospath.join(path,download_name+'.wav')
+                        wavconvtagger(webmpath,wavpath,song,path)
+                    except Exception as e:
+                        messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
+        
+                if filetype=='.flac':
+                    try:
+                        yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
+                        yt.download(path,download_name+'.webm')
+                        flacpath=ospath.join(path,download_name+'.flac')
+                        flacconvtagger(webmpath,flacpath,song,path)
+                    except Exception as e:
+                        messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
+
                 progress['value']+=1
             else:
                 add_text(scrltxt,'Couldn\'t find {} on yt report problem to devs\n'.format(song['name']))
