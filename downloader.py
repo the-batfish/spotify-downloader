@@ -13,6 +13,9 @@ from datetime import datetime
 from pydub import AudioSegment
 from tkinter import messagebox
 from mysql.connector import connect
+from ytmusicapi import YTMusic
+
+ytm=YTMusic()
 
 def checkdb(splink):
     db=connect(host='',user='',passwd='',database='')
@@ -180,17 +183,24 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         try:
             data=checkdb(song['external_urls']['spotify'])
         except:
+            data=None
             pass
         
-        try:         
-            vid=YouTube(data[0])
+        try:
+            if data==None:
+                try:
+                    isrc_code=song['external_ids']['isrc'].replace('-','')
+                    vid_id=ytm.search(isrc_code)[0]['videoId']
+                    vid_url = 'http://youtu.be/'+ vid_id
+                    vid=YouTube(vid_url)
+                except:
+                    results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+                    spsonglen = int(song['duration_ms']/1000)
+                    vid=accusearch(results=results,songlen=spsonglen)
+            else:
+                vid=YouTube(data[0])
         except:
-            try:
-                results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
-                spsonglen = int(song['duration_ms']/1000)
-                vid=accusearch(results=results,songlen=spsonglen)
-            except:
-                vid=None
+            vid=None
 
         if vid != None:
             download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
@@ -260,12 +270,18 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
             except:
                 data=None
                 pass
-
+            
             try:
                 if data==None:
-                    results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
-                    spsonglen = int(song['duration_ms']/1000)
-                    vid=accusearch(results=results,songlen=spsonglen)
+                    try:
+                        isrc_code=song['external_ids']['isrc'].replace('-','')
+                        vid_id=ytm.search(isrc_code)[0]['videoId']
+                        vid_url = 'http://youtu.be/'+ vid_id
+                        vid=YouTube(vid_url)
+                    except:
+                        results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+                        spsonglen = int(song['duration_ms']/1000)
+                        vid=accusearch(results=results,songlen=spsonglen)
                 else:
                     vid=YouTube(data[0])
             except:
