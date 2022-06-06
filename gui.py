@@ -11,7 +11,7 @@ from webbrowser import open_new_tab
 #defining a window
 global window
 window=Tk()
-window.geometry('600x700')
+window.geometry('600x600')
 window.resizable(False,False)
 window.configure(bg = '#3d3d3d')
 window.title('Spotify Downloader')
@@ -40,11 +40,11 @@ progress=Progressbar(window,orient = HORIZONTAL,mode = 'determinate',length=100)
 progress.place(relx=0.5,rely=0.7,width=400,anchor=CENTER)
 
 scrolled_cont = LabelFrame(window, font=("Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
-scrolled_cont.place(relx=0.5,rely=0.43,height=330,width=510,anchor=CENTER)
+scrolled_cont.place(relx=0.5,rely=0.43,height=290,width=510,anchor=CENTER)
 
 global output_box
 output_box=scrolledtext.ScrolledText(window, font = ("Arial",10),state='disabled',bg='#3d3d3d',fg='white')
-output_box.place(relx=0.5,rely=0.43,height=320,width=500,anchor=CENTER)
+output_box.place(relx=0.5,rely=0.43,height=280,width=500,anchor=CENTER)
 
 dl_location_button=Button(window,text='Change download folder',fg='#3d3d3d',bg='white',font = ("Arial",14),command=lambda:directrory())
 dl_location_button.place(relx=0.3,rely=0.91,anchor=CENTER)
