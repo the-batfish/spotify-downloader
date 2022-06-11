@@ -145,6 +145,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
         pass
     threads=[]
     leader=[]
+
     if link.startswith('https://open.spotify.com/track'):
         dlbut['state']='disabled'
         progress['maximum']=1
@@ -152,6 +153,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
             t=Thread(target=download_song,args=(link,scrltxt,path,filetype,dlbut,progress),daemon=False)
             t.start()
             threads.append(t)
+
     elif link.startswith('https://open.spotify.com/playlist/'):
         dlbut['state']='disabled'
         playlist=sp.playlist_tracks(link)
@@ -164,7 +166,26 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
         add_text(scrltxt,'Downloading playlist \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
         for i in range(threadno):
-            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress),daemon=False)
+            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,False),daemon=False)
+            t.start()
+            if not lead:
+                threads.append(t)
+            else:
+                leader.append(t)          
+            lead=False
+
+    elif link.startswith('https://open.spotify.com/album/'):
+        dlbut['state']='disabled'
+        playlist=sp.album(link)
+        name=playlist['name']
+        tracks=playlist['tracks']['items']
+        progress['maximum']=len(tracks)
+        for i in tracks:
+            i['album']={'name':name,'artists':playlist['artists'],'release_date':playlist['release_date'],'images':playlist['images'],'total_tracks':playlist['total_tracks']}
+        add_text(scrltxt,'Downloading album \"{}\" with {} songs\n'.format(name,len(tracks)))
+        lead=True
+        for i in range(threadno):
+            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,True),daemon=False)
             t.start()
             if not lead:
                 threads.append(t)
@@ -260,9 +281,12 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
         progress['value']+=1
 
-def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress):
+def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,album:bool):
     for i in tracks:
-        song=i['track']
+        if not album:
+            song=i['track']
+        else:
+            song=i    
         download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
         if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))):
             try:
