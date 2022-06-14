@@ -6,7 +6,6 @@ If you get a Microsoft defender smartscreen popup like the one shown below do no
 
 ![image](https://user-images.githubusercontent.com/74890659/173220425-ea7b3e77-b798-4cef-ac9f-e3cab624f60d.png)
 
-
 If you have any problems,doubts,suggestion or any other queries you can reach me on discord at Rickyrorton#6693 or
 join the spotify downloader support server at https://discord.gg/8pTQAfAAbm
 
@@ -32,20 +31,9 @@ The 2 out of 69(nice) detections are false positives and the connections it make
 
 =======================Only if you are going to use the .py file=======================
 
-Spotipy:
-```pip install spotipy --upgrade```
+Make sure to install all required packages listed in the requirements.txt file by running the following command
 
-youtube_search:
-```pip install youtube-search```
-
-pytube:
-```pip install pytube```
-
-mutagen:
-```pip install mutagen```
-
-pydub:
-```pip install pydub```
+```pip install -r requirements.txt```
 
 1)You also require a client id and client secret for the program to work which you can obtain from https://developer.spotify.com/ 
 by logging in and creating a new app from the dashboard which will then give you a client id and client secret 
@@ -55,11 +43,11 @@ which you paste in ```downloader.py```file
 
 ![image](https://user-images.githubusercontent.com/74890659/130178984-0243cc2a-d180-45c9-b132-0d1783feabc3.png)
 
-2)Then download the repository and open the ```gui.py``` file and paste the link of 
-the playlist you want to download and click on the "Download songs" button and let it download and convert 
-the songs which will take time depending on your cpu and number of songs in the playlist or if you are 
-unwilling to use the .py file you can instead use the .exe file which does not require the libraries to be
-installed although ffmpeg has to installed and added to path for it to work
+2)Then run the ```gui.py``` file and paste the link of the playlist you want to download and click on 
+the "Download songs" button and let it download and convert the songs which will take time depending 
+on your cpu and number of songs in the playlist or if you are unwilling to use the .py file you can 
+instead use the .exe file which does not require the libraries to beinstalled although ffmpeg has to 
+installed and added to path for it to work
 
 ![image](https://user-images.githubusercontent.com/74890659/150334965-049446e5-8daa-4b65-8213-dcf2bb9247ff.png)
 
