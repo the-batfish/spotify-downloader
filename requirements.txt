@@ -1,0 +1,8 @@
+mysql.connector
+pillow
+mutagen
+pydub
+pytube
+spotipy
+ytmusicapi
+youtube_search
