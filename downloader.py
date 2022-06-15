@@ -211,8 +211,14 @@ def download_song(link,scrltxt,path,filetype,button,progress):
             if data==None:
                 try:
                     isrc_code=song['external_ids']['isrc'].replace('-','')
-                    vid_id=ytm.search(isrc_code)[0]['videoId']
-                    vid_url = 'http://youtu.be/'+ vid_id
+                    vid_id=ytm.search(isrc_code)
+                    for i in vid_id:
+                        spartists=[j['name'] for j in song['artists']]
+                        ytartists=[x['name'] for x in i['artists']]
+                        if any(char in spartists for char in ytartists) or song['name']==i['title'] :
+                            vid_url = 'http://youtu.be/'+ i['videoId']
+                            print('ISRC-',song['name'],i['title'])
+                            break
                     vid=YouTube(vid_url)
                 except:
                     results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
@@ -299,8 +305,14 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,album:
                 if data==None:
                     try:
                         isrc_code=song['external_ids']['isrc'].replace('-','')
-                        vid_id=ytm.search(isrc_code)[0]['videoId']
-                        vid_url = 'http://youtu.be/'+ vid_id
+                        vid_id=ytm.search(isrc_code)
+                        for i in vid_id:
+                            spartists=[j['name'] for j in song['artists']]
+                            ytartists=[x['name'] for x in i['artists']]
+                            if any(char in spartists for char in ytartists) or song['name']==i['title'] :
+                                vid_url = 'http://youtu.be/'+ i['videoId']
+                                print('ISRC-',song['name'],i['title'])
+                                break
                         vid=YouTube(vid_url)
                     except:
                         results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
