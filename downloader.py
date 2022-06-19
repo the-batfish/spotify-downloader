@@ -90,12 +90,12 @@ def m4atagger(mp4,m4a,song,path):
     except Exception as e:
         print(e)
 
-def mp3convtagger(mp4,mp3,song,path):
+def mp3convtagger(mp4,mp3,song,path,bitrate):
     try:
         iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
         request.urlretrieve(song['album']['images'][0]['url'],iconname)
         convert=AudioSegment.from_file(mp4)
-        convert.export(mp3,format='mp3')
+        convert.export(mp3,format='mp3',bitrate=bitrate)
         tags=ID3(mp3)
         tags.add(TIT2(encoding=3, text=[song['name']]))
         tags.add(TALB(encoding=3, text=[song['album']['name']]))
@@ -130,7 +130,7 @@ def flacconvtagger(webm,flac,song,path):
     except Exception as e:
         print(e)
 
-def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
+def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str,bitrate:str):
     global threads
     global leader
     scrltxt.config(state='normal')
@@ -150,7 +150,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
         dlbut['state']='disabled'
         progress['maximum']=1
         for i in range(1):
-            t=Thread(target=download_song,args=(link,scrltxt,path,filetype,dlbut,progress),daemon=False)
+            t=Thread(target=download_song,args=(link,scrltxt,path,filetype,dlbut,progress,bitrate),daemon=False)
             t.start()
             threads.append(t)
 
@@ -166,7 +166,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
         add_text(scrltxt,'Downloading playlist \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
         for i in range(threadno):
-            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,False),daemon=False)
+            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,bitrate,False),daemon=False)
             t.start()
             if not lead:
                 threads.append(t)
@@ -185,7 +185,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str):
         add_text(scrltxt,'Downloading album \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
         for i in range(threadno):
-            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,True),daemon=False)
+            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,bitrate,True),daemon=False)
             t.start()
             if not lead:
                 threads.append(t)
@@ -314,7 +314,7 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,album:
                                 print('ISRC-',song['name'],i['title'])
                                 break
                         vid=YouTube(vid_url)
-                    except:
+                    except Exception as e:
                         results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
                         spsonglen = int(song['duration_ms']/1000)
                         vid=accusearch(results=results,songlen=spsonglen)

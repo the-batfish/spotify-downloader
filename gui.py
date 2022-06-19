@@ -7,6 +7,7 @@ import sys
 from os import path as ospath
 import downloader
 from webbrowser import open_new_tab
+from pickle import load,dump
 
 #defining a window
 global window
@@ -29,11 +30,14 @@ output_label.place(relx=0.5,rely=0.17,anchor=CENTER)
 download_location=Label(window,text='Download location:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white',justify=LEFT)
 download_location.place(relx=0.5,rely=0.84,anchor=CENTER)
 
-thread_number=Label(window,text='How many threads to use?\n(More threads=more cpu usage)',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
-thread_number.place(relx=0.2,rely=0.77,anchor=CENTER)
+thread_number=Label(window,text='Thread count:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
+thread_number.place(relx=0.12,rely=0.78,anchor=CENTER)
 
 filetype=Label(window,text='Filetype:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
-filetype.place(relx=0.73,rely=0.77,anchor=CENTER)
+filetype.place(relx=0.46,rely=0.78,anchor=CENTER)
+
+bitrate=Label(window,text='Bitrate:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
+bitrate.place(relx=0.73,rely=0.78,anchor=CENTER)
 
 global progress
 progress=Progressbar(window,orient = HORIZONTAL,mode = 'determinate',length=100)
@@ -56,14 +60,21 @@ download_button.place(relx=0.7,rely=0.91,anchor=CENTER)
 global filetype_default
 filetypes=['.m4a','.mp3','.wav','.flac']
 filetype_default=StringVar()
-filetype_default.set('.m4a')    
+filetype_default.set('.m4a')
 filetype_dropdown=OptionMenu(window,filetype_default,*filetypes)
-filetype_dropdown.place(relx=0.8,rely=0.75)
+filetype_dropdown.place(relx=0.52,rely=0.755)
+
+global bitrate_default
+bitrates=['96k','128k','192k','320k']
+bitrate_default=StringVar()
+bitrate_default.set('192k')   
+bitrate_dropdown=OptionMenu(window,bitrate_default,*bitrates)
+bitrate_dropdown.place(relx=0.78,rely=0.755)
 
 global thread_num_set
 thread_num_set=Scale(window,from_=1,to=20,tickinterval=19,orient=HORIZONTAL,highlightbackground='#3d3d3d',background='#3d3d3d',fg='white')
 thread_num_set.set(4)
-thread_num_set.place(relx=0.4,rely=0.73)
+thread_num_set.place(relx=0.2,rely=0.73)
 
 entry_cont = LabelFrame(window, font=("Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
 entry_cont.place(relx=0.62,rely=0.12,width=394,height=24,anchor=CENTER)
@@ -87,7 +98,15 @@ elif __file__:
 
 #setting default download location
 global location
-location=ospath.join(application_path,'Downloads').replace('\\','/')
+if ospath.exists(ospath.join(application_path,'spdconfig.dat')):
+    f=open(ospath.join(application_path,'spdconfig.dat'),'rb')
+    dict=load(f)
+    location=dict['location']
+    filetype_default.set(dict['filetype'])
+    bitrate_default.set(dict['bitrate'])
+    thread_num_set.set(dict['threads'])
+else:
+    location=ospath.join(application_path,'Downloads').replace('\\','/')
 download_location.config(text='Download location:'+str(location))
 
 #function for importing pictures into the gui
@@ -118,10 +137,25 @@ def directrory():
         global location
         location=askdirectory()
         if location:
+            dict={'location':location,'bitrate':bitrate_default.get(),'filetype':filetype_default.get(),'threads':thread_num_set.get()}
+            f=open(ospath.join(application_path,'spdconfig.dat'),'wb')
+            dump(dict,f)
+            f.close()
             download_location.config(text='Download location:'+str(location))
         else:
             pass
 
+def saveconf(*args):
+    global localtion
+    dict={'location':location,'bitrate':bitrate_default.get(),'filetype':filetype_default.get(),'threads':thread_num_set.get()}
+
+    f=open(ospath.join(application_path,'spdconfig.dat'),'wb')
+    dump(dict,f)
+    f.close()
+
+filetype_default.trace('w',saveconf)  
+bitrate_default.trace('w',saveconf)
+thread_num_set.config(command=saveconf) 
 def start_downloader():
     global location
     global output_box
@@ -131,7 +165,8 @@ def start_downloader():
     link=playlist_link.get()
     playlist_link.delete(0,len(link))
     threads=thread_num_set.get()
-    filetype=filetype_default.get() 
-    downloader.start(dlbut=download_button,link=link,path=location,threadno=threads,filetype=filetype,scrltxt=output_box,progress=progress)  
+    filetype=filetype_default.get()
+    bitrate=bitrate_default.get()
+    downloader.start(dlbut=download_button,link=link,path=location,threadno=threads,filetype=filetype,scrltxt=output_box,progress=progress,bitrate=bitrate)  
       
 window.mainloop() 
