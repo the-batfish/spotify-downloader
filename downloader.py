@@ -4,6 +4,7 @@ from urllib import request
 from mutagen.mp4 import MP4,MP4Cover
 from mutagen.id3 import ID3,TIT2,APIC,TALB,TPE1,TPE2,TYER,TRCK
 from mutagen.wave import WAVE
+from mutagen.flac import FLAC
 from pytube import YouTube
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -14,6 +15,7 @@ from pydub import AudioSegment
 from tkinter import messagebox
 from mysql.connector import connect
 from ytmusicapi import YTMusic
+from re import sub
 
 ytm=YTMusic()
 
@@ -67,68 +69,74 @@ def accusearch(results,songlen):
     try:
         return YouTube(vid_url)
     except:
-        pass
+        return None
 
 def m4atagger(mp4,m4a,song,path):
-    try:
-        rename(mp4,m4a)
-        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-        request.urlretrieve(song['album']['images'][0]['url'],iconname)
-        tags=MP4(m4a)
-        if not tags.tags:
-            tags.add_tags()
-        tags[u'\xa9nam']=song['name']
-        tags[u'\xa9alb']=song['album']['name']
-        tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
-        tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
-        tags[u'\xa9day']=song['album']['release_date'][0:4]
-        tags[u'trkn']=((int(song["track_number"]),int(song['album']['total_tracks'])),)
-        with open(iconname,'rb') as f:
-            tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
-        tags.save()
-        remove(iconname)
-    except Exception as e:
-        print(e)
+    rename(mp4,m4a)
+    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+    request.urlretrieve(song['album']['images'][0]['url'],iconname)
+    tags=MP4(m4a)
+    if not tags.tags:
+        tags.add_tags()
+    tags[u'\xa9nam']=song['name']
+    tags[u'\xa9alb']=song['album']['name']
+    tags[u'\xa9ART']=', '.join([i['name'] for i in song['artists']])
+    tags[u'aART']=', '.join([i['name'] for i in song['album']['artists']])
+    tags[u'\xa9day']=song['album']['release_date'][0:4]
+    tags[u'trkn']=((int(song["track_number"]),int(song['album']['total_tracks'])),)
+    with open(iconname,'rb') as f:
+        tags['covr'] = [MP4Cover(f.read(),imageformat=MP4Cover.FORMAT_JPEG)]
+    tags.save()
+    remove(iconname)
 
 def mp3convtagger(mp4,mp3,song,path,bitrate):
-    try:
-        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-        request.urlretrieve(song['album']['images'][0]['url'],iconname)
-        convert=AudioSegment.from_file(mp4)
-        convert.export(mp3,format='mp3',bitrate=bitrate)
-        tags=ID3(mp3)
-        tags.add(TIT2(encoding=3, text=[song['name']]))
-        tags.add(TALB(encoding=3, text=[song['album']['name']]))
-        tags.add(TPE1(encoding=3, text=[i['name'] for i in song['artists']]))
-        tags.add(TPE2(encoding=3, text=[i['name'] for i in song['album']['artists']]))
-        tags.add(TYER(encoding=3, text=[song['album']['release_date'][0:4]]))
-        tags.add(TRCK(encoding=3, text=[song['track_number']]))
-        with open(iconname, "rb") as f:
-            tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
-        tags.save(v2_version=3)
-        remove(mp4)
-        remove(iconname)
-    except Exception as e:
-        print(e)
+    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+    request.urlretrieve(song['album']['images'][0]['url'],iconname)
+    convert=AudioSegment.from_file(mp4)
+    convert.export(mp3,format='mp3',bitrate=bitrate)
+    tags=ID3(mp3)
+    tags.add(TIT2(encoding=3, text=[song['name']]))
+    tags.add(TALB(encoding=3, text=[song['album']['name']]))
+    tags.add(TPE1(encoding=3, text=[i['name'] for i in song['artists']]))
+    tags.add(TPE2(encoding=3, text=[i['name'] for i in song['album']['artists']]))
+    tags.add(TYER(encoding=3, text=[song['album']['release_date'][0:4]]))
+    tags.add(TRCK(encoding=3, text=[song['track_number']]))
+    with open(iconname, "rb") as f:
+        tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
+    tags.save(v2_version=3)
+    remove(mp4)
+    remove(iconname)
 
-def wavconvtagger(webm,wav,song,path):
-    try:
-        convert=AudioSegment.from_file(webm)
-        convert.export(wav,format='wav')
-        remove(webm)
-    except Exception as e:
-        print(e)
+def wavconvtagger(webm,wav,song,path,bitrate):
+    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+    request.urlretrieve(song['album']['images'][0]['url'],iconname)
+    convert=AudioSegment.from_file(webm)
+    convert.export(wav,format='wav',bitrate=bitrate)
+    tags=WAVE(wav)
+    tags.add_tags()
+    tags=tags.tags
+    tags.add(TIT2(encoding=3, text=[song['name']]))
+    tags.add(TALB(encoding=3, text=[song['album']['name']]))
+    tags.add(TPE1(encoding=3, text=[i['name'] for i in song['artists']]))
+    tags.add(TPE2(encoding=3, text=[i['name'] for i in song['album']['artists']]))
+    tags.add(TYER(encoding=3, text=[song['album']['release_date'][0:4]]))
+    tags.add(TRCK(encoding=3, text=[song['track_number']]))
+    with open(iconname, "rb") as f:
+        tags.add(APIC(encoding=3,mime=u'image/jpeg',type=3, desc=u'Cover',data=f.read()))
+    tags.save(wav,v2_version=3)
+    remove(webm)
+    remove(iconname)
 
-def flacconvtagger(webm,flac,song,path):
-    try:
-        iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
-        request.urlretrieve(song['album']['images'][0]['url'],iconname)
-        convert=AudioSegment.from_file(webm)
-        convert.export(flac,format='flac')
-        remove(webm)
-        remove(iconname)
-    except Exception as e:
-        print(e)
+def flacconvtagger(webm,flac,song,path,bitrate):
+    iconname=ospath.join(path,remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])+'.jpg')
+    request.urlretrieve(song['album']['images'][0]['url'],iconname)
+    convert=AudioSegment.from_file(webm)
+    convert.export(flac,format='flac',bitrate=bitrate)
+    tags=FLAC(flac).tags
+    
+    remove(webm)
+    remove(iconname)
+
 
 def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str,bitrate:str):
     global threads
@@ -197,7 +205,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str,bit
     else:
         messagebox.showerror('Invalid link','You have given an invalid link,try again this time but with a correct link')
 
-def download_song(link,scrltxt,path,filetype,button,progress):
+def download_song(link,scrltxt,path,filetype,button,progress,bitrate):
     song=sp.track(link)
     download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
     if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))):
@@ -209,21 +217,26 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         
         try:
             if data==None:
-                try:
+                if data==None:
                     isrc_code=song['external_ids']['isrc'].replace('-','')
                     vid_id=ytm.search(isrc_code)
+                    if len(vid_id)==0:
+                        vid_id=ytm.search(song['artists'][0]['name']+' '+song['name'],filter='songs')
                     for i in vid_id:
-                        spartists=[j['name'] for j in song['artists']]
-                        ytartists=[x['name'] for x in i['artists']]
-                        if any(char in spartists for char in ytartists) or song['name']==i['title'] :
+                        spartists=[j['name'].lower() for j in song['artists']]
+                        ytartists=[x['name'].lower() for x in i['artists']]
+                        spname=''.join(i for i in song['name'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                        ytname=''.join(i for i in i['title'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                        if any(char in spartists for char in ytartists) and (spname in ytname or ytname in spname):
                             vid_url = 'http://youtu.be/'+ i['videoId']
-                            print('ISRC-',song['name'],i['title'])
+                            vid=YouTube(vid_url)
                             break
-                    vid=YouTube(vid_url)
-                except:
-                    results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
-                    spsonglen = int(song['duration_ms']/1000)
-                    vid=accusearch(results=results,songlen=spsonglen)
+                        else:
+                            vid=None
+                    if vid==None:
+                        results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
+                        spsonglen = int(song['duration_ms']/1000)
+                        vid=accusearch(results=results,songlen=spsonglen)
             else:
                 vid=YouTube(data[0])
         except:
@@ -248,7 +261,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                     yt=vid.streams.get_audio_only()
                     yt.download(path,download_name+'.mp4')
                     mp3path=ospath.join(path,download_name+'.mp3')
-                    mp3convtagger(mp4path,mp3path,song,path)
+                    mp3convtagger(mp4path,mp3path,song,path,bitrate)
                     add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
@@ -258,7 +271,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                     yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
                     yt.download(path,download_name+'.webm')
                     wavpath=ospath.join(path,download_name+'.wav')
-                    wavconvtagger(webmpath,wavpath,song,path)
+                    wavconvtagger(webmpath,wavpath,song,path,bitrate)
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
@@ -267,7 +280,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
                     yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
                     yt.download(path,download_name+'.webm')
                     flacpath=ospath.join(path,download_name+'.flac')
-                    flacconvtagger(webmpath,flacpath,song,path)
+                    flacconvtagger(webmpath,flacpath,song,path,bitrate)
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
@@ -287,7 +300,7 @@ def download_song(link,scrltxt,path,filetype,button,progress):
         add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
         progress['value']+=1
 
-def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,album:bool):
+def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrate,album:bool):
     for i in tracks:
         if not album:
             song=i['track']
@@ -303,24 +316,29 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,album:
             
             try:
                 if data==None:
-                    try:
-                        isrc_code=song['external_ids']['isrc'].replace('-','')
-                        vid_id=ytm.search(isrc_code)
-                        for i in vid_id:
-                            spartists=[j['name'] for j in song['artists']]
-                            ytartists=[x['name'] for x in i['artists']]
-                            if any(char in spartists for char in ytartists) or song['name']==i['title'] :
-                                vid_url = 'http://youtu.be/'+ i['videoId']
-                                print('ISRC-',song['name'],i['title'])
-                                break
-                        vid=YouTube(vid_url)
-                    except Exception as e:
+                    isrc_code=song['external_ids']['isrc'].replace('-','')
+                    vid_id=ytm.search(isrc_code)
+                    if len(vid_id)==0:
+                        vid_id=ytm.search(song['artists'][0]['name']+' '+song['name'],filter='songs')
+                    for i in vid_id:
+                        spartists=[j['name'].lower() for j in song['artists']]
+                        ytartists=[x['name'].lower() for x in i['artists']]
+                        spname=''.join(i for i in song['name'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                        ytname=''.join(i for i in i['title'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                        if any(char in spartists for char in ytartists) and (spname in ytname or ytname in spname):
+                            vid_url = 'http://youtu.be/'+ i['videoId']
+                            vid=YouTube(vid_url)
+                            break
+                        else:
+                            vid=None
+                    if vid==None:
                         results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
                         spsonglen = int(song['duration_ms']/1000)
                         vid=accusearch(results=results,songlen=spsonglen)
                 else:
                     vid=YouTube(data[0])
-            except:
+            except Exception as e:
+                print(e)
                 vid=None
 
             if vid != None:
@@ -347,20 +365,19 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,album:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
                 if filetype=='.wav':
-                    try:
-                        yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
-                        yt.download(path,download_name+'.webm')
-                        wavpath=ospath.join(path,download_name+'.wav')
-                        wavconvtagger(webmpath,wavpath,song,path)
-                    except Exception as e:
-                        messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-        
+                    #try:
+                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
+                    yt.download(path,download_name+'.webm')
+                    wavpath=ospath.join(path,download_name+'.wav')
+                    wavconvtagger(webmpath,wavpath,song,path,bitrate)
+                    #except Exception as e:
+                        #messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))]   
                 if filetype=='.flac':
                     try:
                         yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
                         yt.download(path,download_name+'.webm')
                         flacpath=ospath.join(path,download_name+'.flac')
-                        flacconvtagger(webmpath,flacpath,song,path)
+                        flacconvtagger(webmpath,flacpath,song,path,bitrate)
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 

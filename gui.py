@@ -45,7 +45,7 @@ progress.place(relx=0.5,rely=0.7,width=400,anchor=CENTER)
 
 scrolled_cont = LabelFrame(window, font=("Arial Bold", 15), background='#1DB954', foreground='white', borderwidth=5, labelanchor="n")
 scrolled_cont.place(relx=0.5,rely=0.43,height=290,width=510,anchor=CENTER)
-
+    
 global output_box
 output_box=scrolledtext.ScrolledText(window, font = ("Arial",10),state='disabled',bg='#3d3d3d',fg='white')
 output_box.place(relx=0.5,rely=0.43,height=280,width=500,anchor=CENTER)
