@@ -305,7 +305,10 @@ def download_song(link,scrltxt,path,filetype,button,progress,bitrate):
 
 def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrate):
     for i in tracks:
-        song=i['track']
+        try:
+            song=i['track']
+        except KeyError:
+            song=i
         download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
         if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))): 
             try:
