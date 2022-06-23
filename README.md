@@ -21,9 +21,13 @@ Debian: https://tracker.debian.org/pkg/ffmpeg
 
 Ubuntu: https://launchpad.net/ubuntu/+source/ffmpeg
 
-The three required ffmpeg executables if you wish to download in mp3 format
+The three required ffmpeg executables if you wish to download in mp3/wav/flac format
 
 ![image](https://user-images.githubusercontent.com/74890659/154211073-fc63a638-789a-489f-883d-0b887176b620.png)
+
+If empty command prompt windows like these open,DO NOT WORRY, they are just ffmpeg windows converting the songs into the required format
+![image](https://user-images.githubusercontent.com/74890659/175236311-05766a35-f08e-45bc-a168-22ee36e11ceb.png)
+
 
 If you are wondering if this has any malware here is the exe checked in virustotal: https://www.virustotal.com/gui/file/92eb314ed69573076d7b9137978d5a0412e6909557d3b133630148409ccaf6a4/detection
 
