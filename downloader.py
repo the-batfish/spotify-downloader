@@ -174,7 +174,7 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str,bit
         add_text(scrltxt,'Downloading playlist \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
         for i in range(threadno):
-            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,bitrate,False),daemon=False)
+            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,bitrate),daemon=False)
             t.start()
             if not lead:
                 threads.append(t)
@@ -189,11 +189,11 @@ def start(dlbut,scrltxt,progress,link:str,path:str,threadno:int,filetype:str,bit
         tracks=playlist['tracks']['items']
         progress['maximum']=len(tracks)
         for i in tracks:
-            i['album']={'name':name,'artists':playlist['artists'],'release_date':playlist['release_date'],'images':playlist['images'],'total_tracks':playlist['total_tracks']}
+            tracks[tracks.index(i)]=sp.track(i['external_urls']['spotify'])
         add_text(scrltxt,'Downloading album \"{}\" with {} songs\n'.format(name,len(tracks)))
         lead=True
         for i in range(threadno):
-            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,bitrate,True),daemon=False)
+            t=Thread(target=download_playlist,args=(tracks[i::threadno],scrltxt,path,filetype,lead,dlbut,progress,bitrate),daemon=False)
             t.start()
             if not lead:
                 threads.append(t)
@@ -218,21 +218,25 @@ def download_song(link,scrltxt,path,filetype,button,progress,bitrate):
         try:
             if data==None:
                 if data==None:
-                    isrc_code=song['external_ids']['isrc'].replace('-','')
-                    vid_id=ytm.search(isrc_code)
-                    if len(vid_id)==0:
-                        vid_id=ytm.search(song['artists'][0]['name']+' '+song['name'],filter='songs')
-                    for i in vid_id:
-                        spartists=[j['name'].lower() for j in song['artists']]
-                        ytartists=[x['name'].lower() for x in i['artists']]
-                        spname=''.join(i for i in song['name'].lower() if i not in ['-','(',')',' ','/','\\',','])
-                        ytname=''.join(i for i in i['title'].lower() if i not in ['-','(',')',' ','/','\\',','])
-                        if any(char in spartists for char in ytartists) and (spname in ytname or ytname in spname):
-                            vid_url = 'http://youtu.be/'+ i['videoId']
-                            vid=YouTube(vid_url)
-                            break
-                        else:
-                            vid=None
+                    try:
+                        isrc_code=song['external_ids']['isrc'].replace('-','')
+                        vid_id=ytm.search(isrc_code)
+                        if len(vid_id)==0:
+                            vid_id=ytm.search(song['artists'][0]['name']+' '+song['name'],filter='songs')
+                        for i in vid_id:
+                            spartists=[j['name'].lower() for j in song['artists']]
+                            ytartists=[x['name'].lower() for x in i['artists']]
+                            spname=''.join(i for i in song['name'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                            ytname=''.join(i for i in i['title'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                            if any(char in spartists for char in ytartists) and (spname in ytname or ytname in spname):
+                                vid_url = 'http://youtu.be/'+ i['videoId']
+                                vid=YouTube(vid_url)
+                                break
+                            else:
+                                vid=None
+                    except:
+                        vid==None
+
                     if vid==None:
                         results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
                         spsonglen = int(song['duration_ms']/1000)
@@ -255,7 +259,6 @@ def download_song(link,scrltxt,path,filetype,button,progress,bitrate):
                     add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                 except Exception as e:
                     messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
-                    print(e)
             if filetype=='.mp3':
                 try:
                     yt=vid.streams.get_audio_only()
@@ -300,14 +303,11 @@ def download_song(link,scrltxt,path,filetype,button,progress,bitrate):
         add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
         progress['value']+=1
 
-def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrate,album:bool):
+def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrate):
     for i in tracks:
-        if not album:
-            song=i['track']
-        else:
-            song=i    
+        song=i['track']
         download_name=remove_sus_characters(song['artists'][0]['name']+'-'+song['name'])
-        if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))):
+        if not (ospath.exists(ospath.join(path,download_name+'.m4a')) or ospath.exists(ospath.join(path,download_name+'.mp3')) or ospath.exists(ospath.join(path,download_name+'.wav')) or ospath.exists(ospath.join(path,download_name+'.flac'))): 
             try:
                 data=checkdb(song['external_urls']['spotify'])
             except:
@@ -316,21 +316,24 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrat
             
             try:
                 if data==None:
-                    isrc_code=song['external_ids']['isrc'].replace('-','')
-                    vid_id=ytm.search(isrc_code)
-                    if len(vid_id)==0:
-                        vid_id=ytm.search(song['artists'][0]['name']+' '+song['name'],filter='songs')
-                    for i in vid_id:
-                        spartists=[j['name'].lower() for j in song['artists']]
-                        ytartists=[x['name'].lower() for x in i['artists']]
-                        spname=''.join(i for i in song['name'].lower() if i not in ['-','(',')',' ','/','\\',','])
-                        ytname=''.join(i for i in i['title'].lower() if i not in ['-','(',')',' ','/','\\',','])
-                        if any(char in spartists for char in ytartists) and (spname in ytname or ytname in spname):
-                            vid_url = 'http://youtu.be/'+ i['videoId']
-                            vid=YouTube(vid_url)
-                            break
-                        else:
-                            vid=None
+                    try:
+                        isrc_code=song['external_ids']['isrc'].replace('-','')
+                        vid_id=ytm.search(isrc_code)
+                        if len(vid_id)==0:
+                            vid_id=ytm.search(song['artists'][0]['name']+' '+song['name'],filter='songs')
+                        for i in vid_id:
+                            spartists=[j['name'].lower() for j in song['artists']]
+                            ytartists=[x['name'].lower() for x in i['artists']]
+                            spname=''.join(i for i in song['name'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                            ytname=''.join(i for i in i['title'].lower() if i not in ['-','(',')',' ','/','\\',','])
+                            if any(char in spartists for char in ytartists) and (spname in ytname or ytname in spname):
+                                vid_url = 'http://youtu.be/'+ i['videoId']
+                                vid=YouTube(vid_url)
+                                break
+                            else:
+                                vid=None
+                    except:
+                        vid=None
                     if vid==None:
                         results = YoutubeSearch(song['artists'][0]['name']+' '+song['name'], max_results=10).to_dict()
                         spsonglen = int(song['duration_ms']/1000)
@@ -338,7 +341,6 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrat
                 else:
                     vid=YouTube(data[0])
             except Exception as e:
-                print(e)
                 vid=None
 
             if vid != None:
@@ -359,25 +361,27 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrat
                         yt=vid.streams.get_audio_only()
                         yt.download(path,download_name+'.mp4')
                         mp3path=ospath.join(path,download_name+'.mp3')
-                        mp3convtagger(mp4path,mp3path,song,path)
+                        mp3convtagger(mp4path,mp3path,song,path,bitrate)
                         add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
                 if filetype=='.wav':
-                    #try:
-                    yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
-                    yt.download(path,download_name+'.webm')
-                    wavpath=ospath.join(path,download_name+'.wav')
-                    wavconvtagger(webmpath,wavpath,song,path,bitrate)
-                    #except Exception as e:
-                        #messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))]   
+                    try:
+                        yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
+                        yt.download(path,download_name+'.webm')
+                        wavpath=ospath.join(path,download_name+'.wav')
+                        wavconvtagger(webmpath,wavpath,song,path,bitrate)
+                        add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
+                    except Exception as e:
+                        messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e)) 
                 if filetype=='.flac':
                     try:
                         yt=vid.streams.filter(mime_type='audio/webm').order_by('abr').desc().first()
                         yt.download(path,download_name+'.webm')
                         flacpath=ospath.join(path,download_name+'.flac')
                         flacconvtagger(webmpath,flacpath,song,path,bitrate)
+                        add_text(scrltxt,'Finished downloading and converting {}\n'.format(song['name']))
                     except Exception as e:
                         messagebox.showerror('Error','Oops program couldnt download {} because of {}'.format(song['name'],e))
 
@@ -388,7 +392,10 @@ def download_playlist(tracks,scrltxt,path,filetype,leader,button,progress,bitrat
                     logger('{}-{}\n'.format(song['name'],song['external_urls']['spotify']))
                     songnotfound(song['external_urls']['spotify'])
                 except:
-                    logger('{}\n'.format(song['name']))
+                    try:
+                        logger('{}\n'.format(song['name']))
+                    except:
+                        pass
                 progress['value']+=1
         else:
             add_text(scrltxt,'Skipping download as {} already exists\n'.format(song['name']))
