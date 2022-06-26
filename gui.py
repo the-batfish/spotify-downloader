@@ -1,4 +1,5 @@
 #importing necessary libraries
+from platform import system
 from tkinter import Entry, StringVar, Tk,Button,Label,scrolledtext,LabelFrame,CENTER,OptionMenu,Scale, HORIZONTAL,LEFT#tkinter for the user interface
 from PIL import Image,ImageTk #Python(PIL) image library for inserting images into the user interface
 from tkinter.filedialog import askdirectory
@@ -14,29 +15,29 @@ global window
 window=Tk()
 window.geometry('600x600')
 window.resizable(False,False)
-window.configure(bg = '#3d3d3d')
+window.configure(bg = '#333333')
 window.title('Spotify Downloader')
 
 #Widgets in the window
-title=Label(window,text=' SPOTIFY DOWNLOADER',font = ("Arial Bold",18),bg = '#3d3d3d', fg = 'white')
+title=Label(window,text=' SPOTIFY DOWNLOADER',font = ("Arial Bold",18),bg = '#333333', fg = 'white')
 title.place(relx=0.5,rely=0.05 ,anchor=CENTER)
 
-entry_label=Label(window,text='Enter song/playlist link:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
+entry_label=Label(window,text='Enter song/playlist link:',font = ("Arial Bold",10),bg = '#333333', fg = 'white')
 entry_label.place(relx=0.15,rely=0.12,anchor=CENTER)
 
-output_label=Label(window,text='OUTPUT:',font = ("Arial Bold",12),bg = '#3d3d3d', fg = 'white')
+output_label=Label(window,text='OUTPUT:',font = ("Arial Bold",12),bg = '#333333', fg = 'white')
 output_label.place(relx=0.5,rely=0.17,anchor=CENTER)
 
-download_location=Label(window,text='Download location:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white',justify=LEFT)
+download_location=Label(window,text='Download location:',font = ("Arial Bold",10),bg = '#333333', fg = 'white',justify=LEFT)
 download_location.place(relx=0.5,rely=0.84,anchor=CENTER)
 
-thread_number=Label(window,text='Thread count:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
+thread_number=Label(window,text='Thread count:',font = ("Arial Bold",10),bg = '#333333', fg = 'white')
 thread_number.place(relx=0.12,rely=0.78,anchor=CENTER)
 
-filetype=Label(window,text='Filetype:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
+filetype=Label(window,text='Filetype:',font = ("Arial Bold",10),bg = '#333333', fg = 'white')
 filetype.place(relx=0.46,rely=0.78,anchor=CENTER)
 
-bitrate=Label(window,text='Bitrate:',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white')
+bitrate=Label(window,text='Bitrate:',font = ("Arial Bold",10),bg = '#333333', fg = 'white')
 bitrate.place(relx=0.73,rely=0.78,anchor=CENTER)
 
 global progress
@@ -72,7 +73,7 @@ bitrate_dropdown=OptionMenu(window,bitrate_default,*bitrates)
 bitrate_dropdown.place(relx=0.78,rely=0.755)
 
 global thread_num_set
-thread_num_set=Scale(window,from_=1,to=20,tickinterval=19,orient=HORIZONTAL,highlightbackground='#3d3d3d',background='#3d3d3d',fg='white')
+thread_num_set=Scale(window,from_=1,to=20,tickinterval=19,orient=HORIZONTAL,bg='#333333',fg='white',highlightthickness=0)
 thread_num_set.set(4)
 thread_num_set.place(relx=0.2,rely=0.73)
 
@@ -86,7 +87,7 @@ playlist_link.bind('<Return>',lambda e:start_downloader())
 
 def server_invite():
     open_new_tab('https://discord.gg/8pTQAfAAbm')
-discord_link=Label(window,text='Click here to contact us on discord if you have any problems',font = ("Arial Bold",10),bg = '#3d3d3d', fg = 'white',cursor="hand2")
+discord_link=Label(window,text='Click here to contact us on discord if you have any problems',font = ("Arial Bold",10),bg = '#333333', fg = 'white',cursor="hand2")
 discord_link.place(relx=0.5,rely=0.97,anchor=CENTER)
 discord_link.bind("<Button-1>", lambda e:server_invite())
 
@@ -105,31 +106,33 @@ if ospath.exists(ospath.join(application_path,'spdconfig.dat')):
     filetype_default.set(dict['filetype'])
     bitrate_default.set(dict['bitrate'])
     thread_num_set.set(dict['threads'])
+elif system()=='Darwin':
+    location=ospath.join(ospath.expanduser("~/Music"), "Spotify Downloader/Downloads")
 else:
     location=ospath.join(application_path,'Downloads').replace('\\','/')
 download_location.config(text='Download location:'+str(location))
 
 #function for importing pictures into the gui
-def image_import(filename,height,width):
+def image_import(filepath,height,width):
     try:
         base_path = sys._MEIPASS
     except Exception:
         base_path = ospath.abspath(".")
     try:
-        image_path=ospath.join(base_path,filename)
+        image_path=ospath.join(base_path,filepath)
         img=Image.open(image_path)
     except:
-        image_path=ospath.join(application_path,filename)
+        image_path=ospath.join(application_path,filepath)
         img=Image.open(image_path)
     img=img.resize((height,width), Image.Resampling.BOX)
     pic=ImageTk.PhotoImage(img)
     return pic
 
 #The actual images being imported
-logo=image_import('logo.png',48,48)
+logo=image_import('img/logo.png',48,48)
 title.config(image=logo,compound=LEFT)
 
-download_logo=image_import('dl_logo.png',40,40)
+download_logo=image_import('img/dl_logo.png',40,40)
 download_button.config(image=download_logo,compound=LEFT)
 
 #download location related stuff

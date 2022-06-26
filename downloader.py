@@ -4,7 +4,7 @@ from urllib import request
 from mutagen.mp4 import MP4,MP4Cover
 from mutagen.id3 import ID3,TIT2,APIC,TALB,TPE1,TPE2,TYER,TRCK
 from mutagen.wave import WAVE
-from mutagen.flac import FLAC
+from mutagen.flac import FLAC,Picture
 from pytube import YouTube
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -15,7 +15,7 @@ from pydub import AudioSegment
 from tkinter import messagebox
 from mysql.connector import connect
 from ytmusicapi import YTMusic
-from re import sub
+from base64 import b64encode
 
 ytm=YTMusic()
 
@@ -132,8 +132,24 @@ def flacconvtagger(webm,flac,song,path,bitrate):
     request.urlretrieve(song['album']['images'][0]['url'],iconname)
     convert=AudioSegment.from_file(webm)
     convert.export(flac,format='flac',bitrate=bitrate)
-    tags=FLAC(flac).tags
-    
+    tags=FLAC(flac)
+    tags['TITLE']=song['name']
+    tags['ARTIST']=', '.join([i['name'] for i in song['artists']])
+    tags['ALBUMARTIST']=', '.join([i['name'] for i in song['album']['artists']])
+    tags['ALBUM']=song['album']['name']
+    tags['DATE']=song['album']['release_date'][0:4]
+    tags['TRACKNUMBER']=str(song['track_number'])
+    image = Picture()
+    image.type = 3
+    if iconname.endswith('png'):
+        mime = 'image/png'
+    else:
+        mime = 'image/jpeg'
+    image.desc = 'front cover'
+    with open(iconname, 'rb') as f:
+        image.data = f.read()
+    tags.add_picture(image)
+    tags.save()
     remove(webm)
     remove(iconname)
 
