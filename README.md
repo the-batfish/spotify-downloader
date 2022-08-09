@@ -15,11 +15,11 @@ FFMPEG Download links:
 
 Windows: https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z (Inside the archive there will be a bin folder in which you will find 3 executables which will have to be installed)
 
+Linux:
+  Debian/Ubuntu:sudo apt-get ffmpeg
+  Arch:sudo pacman -S ffmpeg
+
 Mac OS: https://evermeet.cx/ffmpeg/
-
-Debian: https://tracker.debian.org/pkg/ffmpeg
-
-Ubuntu: https://launchpad.net/ubuntu/+source/ffmpeg
 
 The three required ffmpeg executables if you wish to download in mp3/wav/flac format
 
