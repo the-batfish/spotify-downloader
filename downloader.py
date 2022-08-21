@@ -1,8 +1,12 @@
+# fmt: off
 from datetime import datetime
-from os import path as ospath, remove, rename
+from os import environ, getcwd, listdir
+from os import path as ospath
+from os import pathsep, remove, rename
+from platform import system
 from sys import exit
 from threading import Thread
-from tkinter import messagebox, Toplevel
+from tkinter import messagebox
 from urllib import request
 
 from mutagen.flac import FLAC, Picture
@@ -18,24 +22,71 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_search import YoutubeSearch
 from ytmusicapi import YTMusic
 
-__version__ = "v1.67"
+# fmt: on
+
+__version__ = "v1.68"
 __supported_filetypes__ = (".m4a", ".mp3", ".wav", ".flac")
 
-response = (
-    get("https://api.github.com/repos/rickyrorton/spotify-downloader/releases/latest")
-).json()
-data = response["tag_name"]
-if data.lower() != __version__.lower():
-    ch = messagebox.askokcancel(
-        "UPDATE APP",
-        f"Press OK to update your app to the latest version {data} from the github repository",
+
+def checkversion():
+    response = (
+        get(
+            "https://api.github.com/repos/rickyrorton/spotify-downloader/releases/latest"
+        )
+    ).json()
+    data = response["tag_name"]
+    if data.lower() != __version__.lower():
+        ch = messagebox.askokcancel(
+            "UPDATE APP",
+            f"Press OK to update your app to the latest version {data} from the github repository",
+        )
+        if ch:
+            from webbrowser import open_new_tab
+
+            open_new_tab("https://github.com/rickyrorton/spotify-downloader/releases")
+        elif __name__ != "__main__":
+            exit()
+
+
+t = Thread(target=checkversion())
+t.start()
+t.join()
+
+
+def checkffmpeg():
+    ffmpeg = ["ffmpeg.exe", "ffplay.exe", "ffprobe.exe"]
+    dirs = environ["PATH"].split(pathsep)[0:-1]
+    dirs.append(getcwd())
+    ffmpeg_present = False
+    for i in dirs:
+        if all(j in listdir(i) for j in ffmpeg) and len(listdir(i)) != 0:
+            ffmpeg_present = True
+            break
+
+    if not ffmpeg_present:
+        ch = messagebox.askokcancel(
+            "DOWNLOAD FFMPEG",
+            f"Download ffmpeg to use formats like mp3,press OK to download ffmpeg",
+        )
+        if ch:
+            if system() == "Windows":
+                request.urlretrieve(
+                    "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z",
+                    ospath.join(getcwd(), "ffmpeg.7z"),
+                )
+                messagebox.showinfo(
+                    "INSTALL FFMPEG",
+                    "FFMPEG has been downloaded,extract the contents of the bin folder and place them in the same directory as the downloader",
+                )
+
+
+try:
+    checkffmpeg()
+except:
+    messagebox.showinfo(
+        "FFMPEG Check failed",
+        "FFMPEG executables couldnt be found to download formats other than m4a ffmpeg has to be downloaded manually",
     )
-    if ch:
-        from webbrowser import open_new_tab
-
-        open_new_tab("https://github.com/rickyrorton/spotify-downloader/releases")
-        exit()
-
 ytm = YTMusic()
 
 

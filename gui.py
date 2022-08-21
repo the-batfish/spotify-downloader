@@ -15,7 +15,6 @@ from PIL import (  # Python Imaging Library(PIL) for inserting images into the u
     Image, ImageTk)
 
 import downloader
-
 # fmt: on
 
 
