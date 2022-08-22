@@ -1,8 +1,8 @@
 # fmt: off
 from datetime import datetime
-from os import environ, getcwd, listdir
+from os import getcwd
 from os import path as ospath
-from os import pathsep, remove, rename
+from os import remove, rename
 from platform import system
 from sys import exit
 from threading import Thread
@@ -24,7 +24,7 @@ from ytmusicapi import YTMusic
 
 # fmt: on
 
-__version__ = "v1.68"
+__version__ = "v1.69"
 __supported_filetypes__ = (".m4a", ".mp3", ".wav", ".flac")
 
 
@@ -54,19 +54,11 @@ t.join()
 
 
 def checkffmpeg():
-    ffmpeg = ["ffmpeg.exe", "ffplay.exe", "ffprobe.exe"]
-    dirs = environ["PATH"].split(pathsep)[0:-1]
-    dirs.append(getcwd())
-    ffmpeg_present = False
-    for i in dirs:
-        if all(j in listdir(i) for j in ffmpeg) and len(listdir(i)) != 0:
-            ffmpeg_present = True
-            break
-
-    if not ffmpeg_present:
+    from pydub.utils import which
+    if not(which("ffmpeg")):
         ch = messagebox.askokcancel(
-            "DOWNLOAD FFMPEG",
-            f"Download ffmpeg to use formats like mp3,press OK to download ffmpeg",
+            "FFMPEG NOT FOUND",
+            f"Ffmpeg was not found, kindly download ffmpeg to use formats like mp3,flac and wav,press OK to download ffmpeg",
         )
         if ch:
             if system() == "Windows":
@@ -79,14 +71,12 @@ def checkffmpeg():
                     "FFMPEG has been downloaded,extract the contents of the bin folder and place them in the same directory as the downloader",
                 )
 
-
 try:
     checkffmpeg()
 except:
-    messagebox.showinfo(
-        "FFMPEG Check failed",
-        "FFMPEG executables couldnt be found to download formats other than m4a ffmpeg has to be downloaded manually",
-    )
+    print('error')
+    pass
+
 ytm = YTMusic()
 
 
@@ -167,8 +157,13 @@ def accusearch(results, songlen):
         return None
 
 
-def m4atagger(mp4, m4a, song, path):
-    rename(mp4, m4a)
+def m4atagger(input_file, m4a, song, path, bitrate, conv):
+    if not conv:
+        rename(input_file, m4a)
+    elif conv:
+        convert = AudioSegment.from_file(input_file)
+        convert.export(m4a, format="mp4", bitrate=bitrate)
+        remove(input_file)
     iconname = ospath.join(
         path,
         remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]) + ".jpg",
@@ -189,13 +184,13 @@ def m4atagger(mp4, m4a, song, path):
     remove(iconname)
 
 
-def mp3convtagger(mp4, mp3, song, path, bitrate):
+def mp3convtagger(webm, mp3, song, path, bitrate):
     iconname = ospath.join(
         path,
         remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]) + ".jpg",
     )
     request.urlretrieve(song["album"]["images"][0]["url"], iconname)
-    convert = AudioSegment.from_file(mp4)
+    convert = AudioSegment.from_file(webm)
     convert.export(mp3, format="mp3", bitrate=bitrate)
     tags = ID3(mp3)
     tags.add(TIT2(encoding=3, text=[song["name"]]))
@@ -209,7 +204,7 @@ def mp3convtagger(mp4, mp3, song, path, bitrate):
             APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=f.read())
         )
     tags.save(v2_version=3)
-    remove(mp4)
+    remove(webm)
     remove(iconname)
 
 
@@ -464,21 +459,43 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
             webmpath = ospath.join(path, download_name + ".webm")
             try:
                 match filetype:
-                    case ".m4a":
+                    case "fast .m4a":
+                        filetype=".m4a"
                         yt = vid.streams.get_audio_only()
                         yt.download(path, download_name + ".mp4")
                         m4apath = ospath.join(path, download_name + ".m4a")
-                        m4atagger(mp4path, m4apath, song, path)
+                        m4atagger(mp4path, m4apath, song, path, bitrate, conv=False)
+                        add_text(
+                            scrltxt,
+                            f"Finished downloading and converting {song['name']}\n",
+                        )
+                    
+                    case "quality .m4a":
+                        filetype=".m4a"
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm")
+                            .order_by("abr")
+                            .desc()
+                            .first()
+                        )
+                        yt.download(path, download_name + ".webm")
+                        m4apath = ospath.join(path, download_name + ".m4a")
+                        m4atagger(webmpath, m4apath, song, path, bitrate, True)
                         add_text(
                             scrltxt,
                             f"Finished downloading and converting {song['name']}\n",
                         )
 
                     case ".mp3":
-                        yt = vid.streams.get_audio_only()
-                        yt.download(path, download_name + ".mp4")
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm")
+                            .order_by("abr")
+                            .desc()
+                            .first()
+                        )
+                        yt.download(path, download_name + ".webm")
                         mp3path = ospath.join(path, download_name + ".mp3")
-                        mp3convtagger(mp4path, mp3path, song, path, bitrate)
+                        mp3convtagger(webmpath, mp3path, song, path, bitrate)
                         add_text(
                             scrltxt,
                             f"Finished downloading and converting {song['name']}\n",

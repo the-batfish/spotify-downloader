@@ -101,7 +101,7 @@ class App(Tk):
         filetype = Label(
             self, text="Filetype:", font=("Arial Bold", 10), bg="#333333", fg="white"
         )
-        filetype.place(relx=0.46, rely=0.78, anchor=CENTER)
+        filetype.place(relx=0.45, rely=0.78, anchor=CENTER)
 
         bitrate = Label(
             self, text="Bitrate:", font=("Arial Bold", 10), bg="#333333", fg="white"
@@ -155,10 +155,10 @@ class App(Tk):
             anchor=CENTER,
         )
 
-        filetypes = [".m4a", ".mp3", ".wav", ".flac"]
-        self.filetype_default = StringVar(value=".m4a")
+        filetypes = ["fast .m4a","quality .m4a", ".mp3", ".wav", ".flac"]
+        self.filetype_default = StringVar(value="fast .m4a")
         filetype_dropdown = OptionMenu(self, self.filetype_default, *filetypes)
-        filetype_dropdown.place(relx=0.52, rely=0.755)
+        filetype_dropdown.place(relx=0.51, rely=0.755)
         # Save variable value when it is modified
         self.filetype_default.trace_add("write", self.saveconf)
 
