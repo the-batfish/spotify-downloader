@@ -7,7 +7,8 @@ If you get a Microsoft defender smartscreen popup like the one shown below do no
 ![image](https://user-images.githubusercontent.com/74890659/173220425-ea7b3e77-b798-4cef-ac9f-e3cab624f60d.png)
 
 If you have any problems,doubts,suggestion or any other queries you can reach me on discord at Rickyrorton#6693 or
-join the spotify downloader support server at https://discord.gg/8pTQAfAAbm
+join the spotify downloader support server at https://discord.gg/8pTQAfAAbm.If you would like to support the project
+feel free to donate any amount to my paypal https://paypal.me/rickyrorton
 
 Make sure you install all 3 exe provided with ffmpeg so that the program works as normal.How to install and add ffmpeg to path:https://windowsloop.com/install-ffmpeg-windows-10/#download-ffmpeg
 
