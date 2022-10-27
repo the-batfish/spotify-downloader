@@ -14,7 +14,7 @@ Make sure you install all 3 exe provided with ffmpeg so that the program works a
 
 FFMPEG Download links:
 
-Windows: https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z (Inside the archive there will be a bin folder in which you will find 3 executables which will have to be installed)
+Windows: ~~https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z (Inside the archive there will be a bin folder in which you will find 3 executables which will have to be installed)~~ **It is no longer required for windows as the program does this automatically for you**
 
 Linux:
 
