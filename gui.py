@@ -155,7 +155,7 @@ class App(Tk):
             anchor=CENTER,
         )
 
-        filetypes = ["fast .m4a","quality .m4a", ".mp3", ".wav", ".flac"]
+        filetypes = ["fast .m4a", "quality .m4a", ".mp3", ".wav", ".flac"]
         self.filetype_default = StringVar(value="fast .m4a")
         filetype_dropdown = OptionMenu(self, self.filetype_default, *filetypes)
         filetype_dropdown.place(relx=0.51, rely=0.755)
