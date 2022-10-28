@@ -210,8 +210,8 @@ def mp3convtagger(webm, mp3, song, path, bitrate, icon_url):
     tags = ID3(mp3)
     tags.add(TIT2(encoding=3, text=[song["name"]]))
     tags.add(TALB(encoding=3, text=[song["album"]["name"]]))
-    tags.add(TPE1(encoding=3, text=[i["name"] for i in song["artists"]]))
-    tags.add(TPE2(encoding=3, text=[i["name"] for i in song["album"]["artists"]]))
+    tags.add(TPE1(encoding=3, text=", ".join([i["name"] for i in song["artists"]])))
+    tags.add(TPE2(encoding=3, text=", ".join([i["name"] for i in song["album"]["artists"]])))
     tags.add(TYER(encoding=3, text=[song["album"]["release_date"][0:4]]))
     tags.add(TRCK(encoding=3, text=[song["track_number"]]))
     with open(iconname, "rb") as f:
@@ -236,8 +236,8 @@ def wavconvtagger(webm, wav, song, path, bitrate, icon_url):
     tags = tags.tags
     tags.add(TIT2(encoding=3, text=[song["name"]]))
     tags.add(TALB(encoding=3, text=[song["album"]["name"]]))
-    tags.add(TPE1(encoding=3, text=[i["name"] for i in song["artists"]]))
-    tags.add(TPE2(encoding=3, text=[i["name"] for i in song["album"]["artists"]]))
+    tags.add(TPE1(encoding=3, text=", ".join([i["name"] for i in song["artists"]])))
+    tags.add(TPE2(encoding=3, text=", ".join([i["name"] for i in song["album"]["artists"]])))
     tags.add(TYER(encoding=3, text=[song["album"]["release_date"][0:4]]))
     tags.add(TRCK(encoding=3, text=[song["track_number"]]))
     with open(iconname, "rb") as f:
