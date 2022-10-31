@@ -10,6 +10,7 @@ from tkinter import messagebox
 from urllib import request
 from zipfile import ZipFile
 from requests import get
+import env
 
 from mutagen.flac import FLAC, Picture
 from mutagen.id3 import APIC, ID3, TALB, TIT2, TPE1, TPE2, TRCK, TYER
@@ -125,8 +126,8 @@ def songnotfound(splink):
 
 
 client_credentials_manager = SpotifyClientCredentials(
-    client_id="",
-    client_secret="",
+    client_id=env.CID,
+    client_secret=env.CS
 )
 sp = Spotify(client_credentials_manager=client_credentials_manager)
 
