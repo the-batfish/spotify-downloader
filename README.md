@@ -1,6 +1,12 @@
+Disclaimer:- This program does not download the audio from spotify, but instead downloads it from youtube and adds metadata, album art etc. from spotify.
+
+## Usage and installation
+
 If you are going to be using only the exe:
 
-Just download the latest version of exe from the releases tab on this repository and open the exe and paste a playlist/song link and let it download ,no pre-requsites needed unless you are downloading in mp3 format for which you will need ffmpeg to installed.Either ffmpeg has to be added to path or has to be copied to the directory where the exe file is.
+Just download the latest version of exe from the releases tab on this repository and open the exe and paste a playlist/song link and let it download ,no pre-requsites needed unless you are downloading in mp3 format for which you will need ffmpeg to installed.Either ffmpeg has to be added to path or has to be copied to the directory where the exe file is. 
+
+In the later releases, ffmpeg will automatically be downloaded by the program.
 
 If you get a Microsoft defender smartscreen popup like the one shown below do not panic it does NOT contain malware,its just that the exe isnt signed (requires money to buy a signing certificate) and thus windows thinks it is potentially dangerous.
 
