@@ -35,7 +35,7 @@ class App(Tk):
         self.geometry("600x600")
         self.resizable(False, False)
         self.configure(bg="#333333")
-        self.title("Spotify Downloader")
+        self.title("Spotitube Downloader")
         self.iconphoto(True, self.image_import("./img/logo.ico", 32, 32))
 
 
@@ -68,7 +68,7 @@ class App(Tk):
         self.logo = self.image_import("img/logo.png", 48, 48)
         title = ttk.Label(
             self,
-            text=" SPOTIFY DOWNLOADER",
+            text=" SPOTITUBE DOWNLOADER",
             image=self.logo,
             compound=LEFT,
             font=("Helvetica", 20),
