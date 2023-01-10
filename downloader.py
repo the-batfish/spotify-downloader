@@ -100,7 +100,7 @@ def checkdb(splink):
         host="",
         user="",
         passwd="",
-        database="",env.CID,
+        database="",
     )
     cur = db.cursor(buffered=True)
     cur.execute(f'Select ytlink from songs where splink like"{splink}%"')
