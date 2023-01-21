@@ -480,9 +480,12 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                     icon_url=i['url']
             try:
                 match filetype:
-                    case "fast .m4a":
+                    case ".m4a":
                         filetype = ".m4a"
-                        yt = vid.streams.get_audio_only()
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm",itag="251")
+                            .first()
+                        )
                         yt.download(path, download_name + ".mp4")
                         m4apath = ospath.join(path, download_name + ".m4a")
                         m4atagger(mp4path, m4apath, song, path, bitrate, icon_url, conv=False)
@@ -491,27 +494,9 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                             f"Finished downloading and converting {song['name']}\n",
                         )
 
-                    case "quality .m4a":
-                        filetype = ".m4a"
-                        yt = (
-                            vid.streams.filter(mime_type="audio/webm")
-                            .order_by("abr")
-                            .desc()
-                            .first()
-                        )
-                        yt.download(path, download_name + ".webm")
-                        m4apath = ospath.join(path, download_name + ".m4a")
-                        m4atagger(webmpath, m4apath, song, path, bitrate, icon_url, True)
-                        add_text(
-                            scrltxt,
-                            f"Finished downloading and converting {song['name']}\n",
-                        )
-
                     case ".mp3":
                         yt = (
-                            vid.streams.filter(mime_type="audio/webm")
-                            .order_by("abr")
-                            .desc()
+                            vid.streams.filter(mime_type="audio/webm",itag="251")
                             .first()
                         )
                         yt.download(path, download_name + ".webm")
@@ -524,9 +509,7 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
 
                     case ".wav":
                         yt = (
-                            vid.streams.filter(mime_type="audio/webm")
-                            .order_by("abr")
-                            .desc()
+                            vid.streams.filter(mime_type="audio/webm",itag="251")
                             .first()
                         )
                         yt.download(path, download_name + ".webm")
@@ -539,9 +522,7 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
 
                     case ".flac":
                         yt = (
-                            vid.streams.filter(mime_type="audio/webm")
-                            .order_by("abr")
-                            .desc()
+                            vid.streams.filter(mime_type="audio/webm",itag="251")
                             .first()
                         )
                         yt.download(path, download_name + ".webm")

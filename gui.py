@@ -63,6 +63,11 @@ class App(Tk):
             self.location = os.path.join(self.application_path, "Downloads").replace(
                 "\\", "/"
             )
+#        bitrate = ttk.Label(
+#            self, text="Bitrate:",
+#            font=("Helvetica", 10),
+#        )
+#        bitrate.place(relx=0.73, rely=0.78, anchor=CENTER)
 
         # Widgets in the window
         self.logo = self.image_import("img/logo.png", 48, 48)
@@ -109,12 +114,6 @@ class App(Tk):
         )
         filetype.place(relx=0.45, rely=0.78, anchor=CENTER)
 
-        bitrate = ttk.Label(
-            self, text="Bitrate:",
-            font=("Helvetica", 10),
-        )
-        bitrate.place(relx=0.73, rely=0.78, anchor=CENTER)
-
         self.progress = Progressbar(
             self, orient=HORIZONTAL, mode="determinate", length=100
         )
@@ -146,19 +145,13 @@ class App(Tk):
             anchor=CENTER,
         )
 
-        filetypes = ["fast .m4a", "quality .m4a", ".mp3", ".wav", ".flac"]
+        filetypes = ["top",".m4a",  ".mp3", ".wav", ".flac"]
         self.filetype_default = StringVar(value="fast .m4a")
         filetype_dropdown = ttk.OptionMenu(self, self.filetype_default, *filetypes)
         filetype_dropdown.place(relx=0.51, rely=0.755)
         # Save variable value when it is modified
         self.filetype_default.trace_add("write", self.saveconf)
 
-        bitrates = ["96k", "128k", "192k", "320k"]
-        self.bitrate_default = StringVar(value="192k")
-        bitrate_dropdown = ttk.OptionMenu(self, self.bitrate_default, *bitrates)
-        bitrate_dropdown.place(relx=0.78, rely=0.755)
-        # Save variable value when it is modified
-        self.bitrate_default.trace_add("write", self.saveconf)
 
         self.threads_default = IntVar(value=4)
         thread_scale = ttk.Scale(
@@ -175,7 +168,6 @@ class App(Tk):
         # Setting previous configuration if it exists
         if self.config_data:
             self.filetype_default.set(self.config_data["filetype"])
-            self.bitrate_default.set(self.config_data["bitrate"])
             self.threads_default.set(self.config_data["threads"])
 
         entry_cont = ttk.LabelFrame(
@@ -228,7 +220,6 @@ class App(Tk):
             self.location = location
             config_data = {
                 "location": location,
-                "bitrate": self.bitrate_default.get(),
                 "filetype": self.filetype_default.get(),
                 "threads": self.threads_default.get(),
             }
@@ -239,7 +230,6 @@ class App(Tk):
     def saveconf(self, *args):
         config_data = {
             "location": self.location,
-            "bitrate": self.bitrate_default.get(),
             "filetype": self.filetype_default.get(),
             "threads": self.threads_default.get(),
         }
@@ -251,7 +241,7 @@ class App(Tk):
         self.playlist_link.delete(0, len(link))
         threads = self.threads_default.get()
         filetype = self.filetype_default.get()
-        bitrate = self.bitrate_default.get()
+        bitrate = "160k" 
         downloader.start(
             dlbut=self.download_button,
             link=link,
@@ -259,8 +249,8 @@ class App(Tk):
             threadno=threads,
             filetype=filetype,
             scrltxt=self.output_box,
-            progress=self.progress,
             bitrate=bitrate,
+            progress=self.progress
         )
 
 
