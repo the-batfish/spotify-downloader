@@ -1,4 +1,4 @@
-Disclaimer:- This program does not download the audio from spotify, but instead downloads it from youtube and adds metadata, album art etc. from spotify.
+Disclaimer:- This program does not download the audio from spotify, but instead downloads the opus audio stream from youtube and adds metadata, album art etc. from spotify.
 
 ## Usage and installation
 
