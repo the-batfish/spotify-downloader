@@ -482,23 +482,17 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                 match filetype:
                     case ".m4a":
                         filetype = ".m4a"
-                        yt = (
-                            vid.streams.filter(mime_type="audio/webm",itag="251")
-                            .first()
-                        )
-                        yt.download(path, download_name + ".mp4")
+                        yt = vid.streams.get_by_itag(251) 
+                        yt.download(path, download_name + ".webm")
                         m4apath = ospath.join(path, download_name + ".m4a")
-                        m4atagger(mp4path, m4apath, song, path, bitrate, icon_url, conv=False)
+                        m4atagger(webmpath, m4apath, song, path, bitrate, icon_url, conv=True)
                         add_text(
                             scrltxt,
                             f"Finished downloading and converting {song['name']}\n",
                         )
 
                     case ".mp3":
-                        yt = (
-                            vid.streams.filter(mime_type="audio/webm",itag="251")
-                            .first()
-                        )
+                        yt = vid.streams.get_by_itag(251)
                         yt.download(path, download_name + ".webm")
                         mp3path = ospath.join(path, download_name + ".mp3")
                         mp3convtagger(webmpath, mp3path, song, path, bitrate, icon_url)
@@ -508,10 +502,7 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                         )
 
                     case ".wav":
-                        yt = (
-                            vid.streams.filter(mime_type="audio/webm",itag="251")
-                            .first()
-                        )
+                        yt = vid.streams.get_by_itag(251)
                         yt.download(path, download_name + ".webm")
                         wavpath = ospath.join(path, download_name + ".wav")
                         wavconvtagger(webmpath, wavpath, song, path, bitrate, icon_url)
@@ -521,10 +512,7 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                         )
 
                     case ".flac":
-                        yt = (
-                            vid.streams.filter(mime_type="audio/webm",itag="251")
-                            .first()
-                        )
+                        yt = vid.streams.get_by_itag(251)
                         yt.download(path, download_name + ".webm")
                         flacpath = ospath.join(path, download_name + ".flac")
                         flacconvtagger(webmpath, flacpath, song, path, bitrate,icon_url)

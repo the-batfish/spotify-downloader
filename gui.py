@@ -63,11 +63,6 @@ class App(Tk):
             self.location = os.path.join(self.application_path, "Downloads").replace(
                 "\\", "/"
             )
-#        bitrate = ttk.Label(
-#            self, text="Bitrate:",
-#            font=("Helvetica", 10),
-#        )
-#        bitrate.place(relx=0.73, rely=0.78, anchor=CENTER)
 
         # Widgets in the window
         self.logo = self.image_import("img/logo.png", 48, 48)
@@ -112,7 +107,7 @@ class App(Tk):
             self, text="Filetype:",
             font=("Helvetica", 10),
         )
-        filetype.place(relx=0.45, rely=0.78, anchor=CENTER)
+        filetype.place(relx=0.73, rely=0.78, anchor=CENTER)
 
         self.progress = Progressbar(
             self, orient=HORIZONTAL, mode="determinate", length=100
@@ -148,7 +143,7 @@ class App(Tk):
         filetypes = ["top",".m4a",  ".mp3", ".wav", ".flac"]
         self.filetype_default = StringVar(value="fast .m4a")
         filetype_dropdown = ttk.OptionMenu(self, self.filetype_default, *filetypes)
-        filetype_dropdown.place(relx=0.51, rely=0.755)
+        filetype_dropdown.place(relx=0.78, rely=0.755)
         # Save variable value when it is modified
         self.filetype_default.trace_add("write", self.saveconf)
 
