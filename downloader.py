@@ -25,7 +25,7 @@ from ytmusicapi import YTMusic
 
 # fmt: on
 
-__version__ = "v1.7"
+__version__ = "v1.8"
 __supported_filetypes__ = (".m4a", ".mp3", ".wav", ".flac")
 
 
