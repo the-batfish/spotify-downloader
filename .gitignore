@@ -133,3 +133,6 @@ spdconfig.dat
 log.txt
 
 .cache
+ffprobe.exe
+ffplay.exe
+ffmpeg.exe
