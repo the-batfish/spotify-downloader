@@ -89,18 +89,21 @@ while True:
                 song = k["track"]
             except KeyError:  # Keyerror happens when albums are being download so this try except loop is necessary do not remove
                 song = k
-
-            isrc_code = str(song["external_ids"]["isrc"].replace("-", ""))
-            vid=searchytm(song,isrc_code)
-            
-            if vid==None:#if isrc search doesnt give correct link
-                query=song["artists"][0]["name"] + " " + song["name"]
-                vid=searchytm(song,query)
-                if vid==None:
-                    query=song['name']
+            try:
+                isrc_code = str(song["external_ids"]["isrc"].replace("-", ""))
+                vid=searchytm(song,isrc_code)
+                
+                if vid==None:#if isrc search doesnt give correct link
+                    query=song["artists"][0]["name"] + " " + song["name"]
                     vid=searchytm(song,query)
-            path=ospath.join(getcwd(),name)
-            download_name = str(remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]))
-            download_path=ospath.join(path,download_name)
-            vid.streams.get_by_itag(251).download(path,download_name+'.webm')
-            m4atagger(download_path+'.webm',download_path+'.m4a',song,path)
+                    if vid==None:
+                        query=song['name']
+                        vid=searchytm(song,query)
+                path=ospath.join(getcwd(),name)
+                download_name = str(remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]))
+                download_path=ospath.join(path,download_name)
+                vid.streams.get_by_itag(251).download(path,download_name+'.webm')
+                m4atagger(download_path+'.webm',download_path+'.m4a',song,path)
+                print("Downloaded and converted {}".format(song['name']))
+            except Exception as e:
+                print("Couldnt download song,Error is {} ,send console output to devs")
