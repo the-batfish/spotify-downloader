@@ -106,4 +106,4 @@ while True:
                 m4atagger(download_path+'.webm',download_path+'.m4a',song,path)
                 print("Downloaded and converted {}".format(song['name']))
             except Exception as e:
-                print("Couldnt download song,Error is {} ,send console output to devs")
+                print("Couldnt download song,Error is {} ,send console output to devs".format())

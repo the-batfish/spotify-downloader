@@ -11,12 +11,8 @@ from urllib import request
 from zipfile import ZipFile
 from requests import get
 
-from mutagen.flac import FLAC, Picture
-from mutagen.id3 import APIC, ID3, TALB, TIT2, TPE1, TPE2, TRCK, TYER
-from mutagen.mp4 import MP4, MP4Cover
-from mutagen.wave import WAVE
+from convandtag import m4atagger,mp3convtagger,flacconvtagger,wavconvtagger,remove_sus_characters
 from mysql.connector import connect
-from pydub import AudioSegment
 from pytube import YouTube
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -25,7 +21,7 @@ from ytmusicapi import YTMusic
 
 # fmt: on
 
-__version__ = "v1.8"
+__version__ = "v1.7"
 __supported_filetypes__ = (".m4a", ".mp3", ".wav", ".flac")
 
 
@@ -45,8 +41,8 @@ def checkversion():
             from webbrowser import open_new_tab
 
             open_new_tab("https://github.com/rickyrorton/spotify-downloader/releases")
-        elif __name__ != "__main__":
-            exit()
+        '''elif __name__ != "__main__":
+            exit()'''
 
 
 t = Thread(target=checkversion())
@@ -64,23 +60,36 @@ def checkffmpeg():
         )
         if ch:
             if system() == "Windows":
-                response = (get("https://api.github.com/repos/GyanD/codexffmpeg/releases/latest")).json()
-            assets = (get(response['assets_url'])).json()
+                response = (
+                    get(
+                        "https://api.github.com/repos/GyanD/codexffmpeg/releases/latest"
+                    )
+                ).json()
+            assets = (get(response["assets_url"])).json()
             for i in assets:
-                if 'essentials' in i['name'] and 'zip' in i['name']:
-                    request.urlretrieve(i['browser_download_url'],ospath.join(getcwd(), "ffmpeg.zip"))
+                if "essentials" in i["name"] and "zip" in i["name"]:
+                    request.urlretrieve(
+                        i["browser_download_url"], ospath.join(getcwd(), "ffmpeg.zip")
+                    )
                     break
             with ZipFile(ospath.join(getcwd(), "ffmpeg.zip")) as zip:
-                files=zip.namelist()
-                bin_folder=files[1]
-                ffmpeg_folder=files[0]
-                targets=[]
+                files = zip.namelist()
+                bin_folder = files[1]
+                ffmpeg_folder = files[0]
+                targets = []
                 for i in files:
-                    if i.endswith('bin/ffmpeg.exe') or i.endswith('bin/ffplay.exe') or i.endswith('bin/ffprobe.exe'):
+                    if (
+                        i.endswith("bin/ffmpeg.exe")
+                        or i.endswith("bin/ffplay.exe")
+                        or i.endswith("bin/ffprobe.exe")
+                    ):
                         targets.append(i)
-                        zip.extract(i,getcwd())
+                        zip.extract(i, getcwd())
                 for i in targets:
-                    rename(ospath.join(getcwd(),i),ospath.join(getcwd(),i.replace(bin_folder,'')))
+                    rename(
+                        ospath.join(getcwd(), i),
+                        ospath.join(getcwd(), i.replace(bin_folder, "")),
+                    )
             remove(ospath.join(getcwd(), "ffmpeg.zip"))
             rmdir(ospath.join(getcwd(), bin_folder))
             rmdir(ospath.join(getcwd(), ffmpeg_folder))
@@ -89,56 +98,16 @@ def checkffmpeg():
 try:
     checkffmpeg()
 except Exception as e:
-    print("error",e)
+    print("error", e)
     pass
 
 ytm = YTMusic()
 
-
-def checkdb(splink):
-    db = connect(
-        host="",
-        user="",
-        passwd="",
-        database="",
-    )
-    cur = db.cursor(buffered=True)
-    cur.execute(f'Select ytlink from songs where splink like"{splink}%"')
-    data = cur.fetchone()
-    cur.close()
-    db.close()
-    return data
-
-
-def songnotfound(splink):
-    db = connect(
-        host="",
-        user="",
-        passwd="",
-        database="",
-    )
-    cur = db.cursor(buffered=True)
-    cur.execute(f'insert into notfound values("{splink}")')
-    db.commit()
-    cur.close()
-    db.close()
-
-
 client_credentials_manager = SpotifyClientCredentials(
-    client_id='',
-    client_secret=''
+    client_id="",
+    client_secret="",
 )
 sp = Spotify(client_credentials_manager=client_credentials_manager)
-
-
-def remove_sus_characters(name: str):
-    converted = "".join(
-        i
-        for i in name
-        if i
-        not in ("/", "\\", "?", "%", "*", ":", "|", '"', "<", ">", ".", ",", ";", "=")
-    )
-    return converted
 
 
 def add_text(scrltxt_obj, text: str):
@@ -170,109 +139,6 @@ def accusearch(results, songlen):
         return YouTube(vid_url)
     except:
         return None
-
-
-def m4atagger(input_file, m4a, song, path, bitrate,  icon_url, conv):
-    if not conv:
-        rename(input_file, m4a)
-    elif conv:
-        convert = AudioSegment.from_file(input_file)
-        convert.export(m4a, format="mp4", bitrate=bitrate)
-        remove(input_file)
-    iconname = ospath.join(
-        path,
-        remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]) + ".jpg",
-    )
-    request.urlretrieve(icon_url, iconname)
-    tags = MP4(m4a)
-    if not tags.tags:
-        tags.add_tags()
-    tags["\xa9nam"] = song["name"]
-    tags["\xa9alb"] = song["album"]["name"]
-    tags["\xa9ART"] = ", ".join([i["name"] for i in song["artists"]])
-    tags["aART"] = ", ".join([i["name"] for i in song["album"]["artists"]])
-    tags["\xa9day"] = song["album"]["release_date"][0:4]
-    tags["trkn"] = ((int(song["track_number"]), int(song["album"]["total_tracks"])),)
-    with open(iconname, "rb") as f:
-        tags["covr"] = [MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)]
-    tags.save()
-    remove(iconname)
-
-
-def mp3convtagger(webm, mp3, song, path, bitrate, icon_url):
-    iconname = ospath.join(
-        path,
-        remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]) + ".jpg",
-    )
-    request.urlretrieve(icon_url, iconname)
-    convert = AudioSegment.from_file(webm)
-    convert.export(mp3, format="mp3", bitrate=bitrate)
-    tags = ID3(mp3)
-    tags.add(TIT2(encoding=3, text=[song["name"]]))
-    tags.add(TALB(encoding=3, text=[song["album"]["name"]]))
-    tags.add(TPE1(encoding=3, text=", ".join([i["name"] for i in song["artists"]])))
-    tags.add(TPE2(encoding=3, text=", ".join([i["name"] for i in song["album"]["artists"]])))
-    tags.add(TYER(encoding=3, text=[song["album"]["release_date"][0:4]]))
-    tags.add(TRCK(encoding=3, text=[song["track_number"]]))
-    with open(iconname, "rb") as f:
-        tags.add(
-            APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=f.read())
-        )
-    tags.save(v2_version=3)
-    remove(webm)
-    remove(iconname)
-
-
-def wavconvtagger(webm, wav, song, path, bitrate, icon_url):
-    iconname = ospath.join(
-        path,
-        remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]) + ".jpg",
-    )
-    request.urlretrieve(icon_url, iconname)
-    convert = AudioSegment.from_file(webm)
-    convert.export(wav, format="wav", bitrate=bitrate)
-    tags = WAVE(wav)
-    tags.add_tags()
-    tags = tags.tags
-    tags.add(TIT2(encoding=3, text=[song["name"]]))
-    tags.add(TALB(encoding=3, text=[song["album"]["name"]]))
-    tags.add(TPE1(encoding=3, text=", ".join([i["name"] for i in song["artists"]])))
-    tags.add(TPE2(encoding=3, text=", ".join([i["name"] for i in song["album"]["artists"]])))
-    tags.add(TYER(encoding=3, text=[song["album"]["release_date"][0:4]]))
-    tags.add(TRCK(encoding=3, text=[song["track_number"]]))
-    with open(iconname, "rb") as f:
-        tags.add(
-            APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=f.read())
-        )
-    tags.save(wav, v2_version=3)
-    remove(webm)
-    remove(iconname)
-
-
-def flacconvtagger(webm, flac, song, path, bitrate, icon_url    ):
-    iconname = ospath.join(
-        path,
-        remove_sus_characters(song["artists"][0]["name"] + "-" + song["name"]) + ".jpg",
-    )
-    request.urlretrieve(icon_url, iconname)
-    convert = AudioSegment.from_file(webm)
-    convert.export(flac, format="flac", bitrate=bitrate)
-    tags = FLAC(flac)
-    tags["TITLE"] = song["name"]
-    tags["ARTIST"] = ", ".join([i["name"] for i in song["artists"]])
-    tags["ALBUMARTIST"] = ", ".join([i["name"] for i in song["album"]["artists"]])
-    tags["ALBUM"] = song["album"]["name"]
-    tags["DATE"] = song["album"]["release_date"][0:4]
-    tags["TRACKNUMBER"] = str(song["track_number"])
-    image = Picture()
-    image.type = 3
-    image.desc = "front cover"
-    with open(iconname, "rb") as f:
-        image.data = f.read()
-    tags.add_picture(image)
-    tags.save()
-    remove(webm)
-    remove(iconname)
 
 
 def start(
@@ -338,7 +204,7 @@ def start(
                 args=(
                     tracks[i::threadno],
                     scrltxt,
-                    path,
+                    ospath.join(path,name),
                     filetype,
                     lead,
                     dlbut,
@@ -370,7 +236,7 @@ def start(
                 args=(
                     tracks[i::threadno],
                     scrltxt,
-                    path,
+                    ospath.join(path,name),
                     filetype,
                     lead,
                     dlbut,
@@ -397,60 +263,36 @@ def start(
             "You have given an invalid link,try again this time but with a correct link",
         )
 
-
-def get_ytVid(song):
+def searchytm(song, query):
+    vid_id = ytm.search(query)
     try:
-        data = checkdb(song["external_urls"]["spotify"])
-    except:
-        data = None
-
-    try:
-        if data == None:
-            try:
-                isrc_code = song["external_ids"]["isrc"].replace("-", "")
-                vid_id = ytm.search(isrc_code)
-                if len(vid_id) == 0:
-                    vid_id = ytm.search(
-                        song["artists"][0]["name"] + " " + song["name"],
-                        filter="songs",
-                    )
-                for i in vid_id:
-                    spartists = [j["name"].lower() for j in song["artists"]]
-                    ytartists = [x["name"].lower() for x in i["artists"]]
-                    spname = "".join(
-                        i
-                        for i in song["name"].lower()
-                        if i not in ["-", "(", ")", " ", "/", "\\", ","]
-                    )
-                    ytname = "".join(
-                        i
-                        for i in i["title"].lower()
-                        if i not in ["-", "(", ")", " ", "/", "\\", ","]
-                    )
-                    if any(char in spartists for char in ytartists) and (
-                        spname in ytname or ytname in spname
-                    ):
-                        vid_url = "https://youtu.be/" + i["videoId"]
-                        vid = YouTube(vid_url)
-                        break
-                    else:
-                        vid = None
-            except:
-                vid = None
-
-            if vid == None:
-                results = YoutubeSearch(
-                    song["artists"][0]["name"] + " " + song["name"],
-                    max_results=10,
-                ).to_dict()
-                spsonglen = int(song["duration_ms"] / 1000)
-                vid = accusearch(results=results, songlen=spsonglen)
-        else:
-            vid = YouTube(data[0])
-        return vid
-    except:
+        for (
+            i
+        ) in (
+            vid_id
+        ):  # to go thru list of returned results and check for result with matching artist
+            spduration = int(song["duration_ms"] / 1000)
+            if i["duration_seconds"] in range(
+                spduration - 5, spduration + 5
+            ):  # atleast one artist should be common to both and name should match
+                vid_url = "https://youtu.be/" + i["videoId"]
+                vid = YouTube(vid_url)
+                return vid
+        return None
+    except Exception as e:
         return None
 
+def get_ytVid(song):
+    isrc_code = str(song["external_ids"]["isrc"].replace("-", ""))
+    vid = searchytm(song, isrc_code)
+
+    if vid == None:  # if isrc search doesnt give correct link
+        query = song["artists"][0]["name"] + " " + song["name"]
+        vid = searchytm(song, query)
+        if vid == None:
+            query = song["name"]
+            vid = searchytm(song, query)
+    return vid
 
 def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode):
     song = sp.track(link) if mode == "Single" else link
@@ -470,29 +312,40 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
         )
         vid = get_ytVid(song)
         if vid:
-            mp4path = ospath.join(path, download_name + ".mp4")
             webmpath = ospath.join(path, download_name + ".webm")
-            icon_url= ''
-            imax=0
+            icon_url = ""
+            imax = 0
             for i in song["album"]["images"]:
-                if imax<i['height']:
-                    imax=i['height']
-                    icon_url=i['url']
+                if imax < i["height"]:
+                    imax = i["height"]
+                    icon_url = i["url"]
             try:
                 match filetype:
                     case ".m4a":
                         filetype = ".m4a"
-                        yt = vid.streams.get_by_itag(251) 
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm")
+                            .order_by("abr")
+                            .desc()
+                            .first()
+                        )
                         yt.download(path, download_name + ".webm")
                         m4apath = ospath.join(path, download_name + ".m4a")
-                        m4atagger(webmpath, m4apath, song, path, bitrate, icon_url, conv=True)
+                        m4atagger(
+                            webmpath, m4apath, song, path, bitrate, icon_url, True
+                        )
                         add_text(
                             scrltxt,
                             f"Finished downloading and converting {song['name']}\n",
                         )
 
                     case ".mp3":
-                        yt = vid.streams.get_by_itag(251)
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm")
+                            .order_by("abr")
+                            .desc()
+                            .first()
+                        )
                         yt.download(path, download_name + ".webm")
                         mp3path = ospath.join(path, download_name + ".mp3")
                         mp3convtagger(webmpath, mp3path, song, path, bitrate, icon_url)
@@ -502,7 +355,12 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                         )
 
                     case ".wav":
-                        yt = vid.streams.get_by_itag(251)
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm")
+                            .order_by("abr")
+                            .desc()
+                            .first()
+                        )
                         yt.download(path, download_name + ".webm")
                         wavpath = ospath.join(path, download_name + ".wav")
                         wavconvtagger(webmpath, wavpath, song, path, bitrate, icon_url)
@@ -512,10 +370,17 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                         )
 
                     case ".flac":
-                        yt = vid.streams.get_by_itag(251)
+                        yt = (
+                            vid.streams.filter(mime_type="audio/webm")
+                            .order_by("abr")
+                            .desc()
+                            .first()
+                        )
                         yt.download(path, download_name + ".webm")
                         flacpath = ospath.join(path, download_name + ".flac")
-                        flacconvtagger(webmpath, flacpath, song, path, bitrate,icon_url)
+                        flacconvtagger(
+                            webmpath, flacpath, song, path, bitrate, icon_url
+                        )
                         add_text(
                             scrltxt,
                             f"Finished downloading and converting {song['name']}\n",
@@ -558,7 +423,6 @@ def download_song(link, scrltxt, path, filetype, button, progress, bitrate, mode
                 )
             try:
                 logger(f"{song['name']}-{song['external_urls']['spotify']}")
-                songnotfound(link)
             except:
                 try:
                     logger(f"{song['name']}\n")
@@ -583,7 +447,9 @@ def download_playlist(
     for i in tracks:
         try:
             song = i["track"]
-        except KeyError:  # Keyerror happens when albums are being download so this try except loop is necessary do not remove
+        except (
+            KeyError
+        ):  # Keyerror happens when albums are being download so this try except loop is necessary do not remove
             song = i
         download_song(
             song, scrltxt, path, filetype, button, progress, bitrate, "Multiple"
@@ -599,11 +465,6 @@ def download_playlist(
             "Songs have finished downloading", "All the songs have finished downloading"
         )
         progress["value"] = 0
-
-
-def downloadyt(link, filetype, res, location):
-    pass
-
 
 if __name__ == "__main__":
     # Checking for song (debugging?)
