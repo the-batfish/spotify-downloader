@@ -1,3 +1,6 @@
+##WARNING
+This repo is not actively maintained anymore, please use another project.
+
 Disclaimer:- This program does not download the audio from spotify, but instead downloads the opus audio stream from youtube and adds metadata, album art etc. from spotify.
 
 ## Usage and installation
